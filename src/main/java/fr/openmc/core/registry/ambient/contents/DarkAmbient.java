@@ -6,7 +6,7 @@ import fr.openmc.core.registry.ambient.CustomAmbientRegistry;
 import fr.openmc.core.registry.ambient.builder.AmbientBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
+import fr.openmc.api.datapacks.builders.DimensionTypeBuilder;
 
 public class DarkAmbient extends CustomAmbient {
     @Override
@@ -29,7 +29,7 @@ public class DarkAmbient extends CustomAmbient {
                 )
                 .defaultClock(null)
                 .timelines((String) null)
-                .skybox(DimensionType.Skybox.END)
+                .skybox(DimensionTypeBuilder.Skybox.END)
                 .hasSkylight(true);
     }
 

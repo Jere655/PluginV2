@@ -84,7 +84,7 @@ public class ShopSalesMenu extends PaginatedMenu {
             Component lastRemoval = this.shop.getLastWithdrawal() == null ? TranslationManager.translation("global.never") : Component.text(this.shop.getLastWithdrawal().toLocalDateTime().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)));
             itemMeta.displayName(TranslationManager.translation("feature.shop.menu.sales.get_turnover.name"));
             itemMeta.lore(TranslationManager.translationLore("feature.shop.menu.sales.get_turnover.lore", Component.text(this.shop.getTurnover() * 0.8 + " " + EconomyManager.getEconomyIcon()).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD), lastRemoval.color(NamedTextColor.LIGHT_PURPLE)));
-        }).setOnClick(_ -> {
+        }).setOnClick(ignored -> {
             this.shop.withdrawTurnover();
             this.shop.setLastWithdrawalToNow();
             update();

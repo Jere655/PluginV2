@@ -68,7 +68,7 @@ public class ScoreboardManager extends Feature implements Listener, NotLoadInUni
 
             Map<BaseScoreboard, Long> playerUpdates = lastUpdate.computeIfAbsent(
                     player.getUniqueId(),
-                    _ -> new HashMap<>()
+                    ignored -> new HashMap<>()
             );
 
             long last = playerUpdates.getOrDefault(active, 0L);

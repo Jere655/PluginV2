@@ -16,7 +16,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.function.Consumer;
 
@@ -86,7 +85,7 @@ public class AmbientBuilder {
         return this;
     }
 
-    public AmbientBuilder skybox(DimensionType.Skybox skybox) {
+    public AmbientBuilder skybox(DimensionTypeBuilder.Skybox skybox) {
         return skybox(skybox.getSerializedName());
     }
 
@@ -228,12 +227,12 @@ public class AmbientBuilder {
             // * si ça pas été override par le biome mis par le CustomAmbient
             for (var biomeEntry : biomeRegistry.entrySet()) {
                 ResourceKey<Biome> key = biomeEntry.getKey();
-                if (key.identifier().getNamespace().equals(CustomAmbientRegistry.NAMESPACE)) continue; // * On skip les biomes de notre datapack
+                if (key.location().getNamespace().equals(CustomAmbientRegistry.NAMESPACE)) continue; // * On skip les biomes de notre datapack
 
                 Biome biome = biomeEntry.getValue();
 
                 datapack.addInjector(ambient.toBiomeVariant(
-                        biome, ambient.toBiomeVariantKey(key.identifier())));
+                        biome, ambient.toBiomeVariantKey(key.location())));
             }
         }
     }

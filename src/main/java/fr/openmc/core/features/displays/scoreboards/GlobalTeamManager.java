@@ -62,7 +62,7 @@ public class GlobalTeamManager {
 
         Component prefix = groupToPrefixCache.computeIfAbsent(
                 playerGroup.getName(),
-                _ -> LuckPermsHook.getFormattedPAPIPrefix(playerGroup)
+                ignored -> LuckPermsHook.getFormattedPAPIPrefix(playerGroup)
         );
 
         int weight = playerGroup.getWeight().orElse(0);

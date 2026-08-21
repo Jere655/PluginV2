@@ -13,11 +13,10 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Dolphin;
 import org.bukkit.entity.Drowned;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Nautilus;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
@@ -25,11 +24,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Leviathan extends CustomMob<Nautilus> {
+public class Leviathan extends CustomMob<Dolphin> {
     public Leviathan(String id) {
         super(id,
                 TranslationManager.translation("feature.dailyevents.miraculousfishing.mob.leviathan"),
-                Nautilus.class,
+                Dolphin.class,
                 40,
                 20,
                 RandomUtils.randomBetween(0.3, 0.5),
@@ -43,50 +42,53 @@ public class Leviathan extends CustomMob<Nautilus> {
     }
 
     @Override
-    public Nautilus spawn(Location spawnLocation) {
-        Nautilus nautilus = this.getPreBuildMob(spawnLocation);
+    public Dolphin spawn(Location spawnLocation) {
+        Dolphin dolphin = this.getPreBuildMob(spawnLocation);
 
-        spawnPassager(nautilus);
+        spawnPassager(dolphin);
 
-        startDashAi(nautilus);
+        startDashAi(dolphin);
 
-        return nautilus;
+        return dolphin;
     }
 
     /**
-     * Lance le scheduler qui fait dash le nautilus, sur le joueur
-     * @param nautilus le nautilus ciblé
+     * Lance le scheduler qui fait dash le dauphin, sur le joueur
+     * @param dolphin le dauphin ciblé
      */
-    private void startDashAi(Nautilus nautilus) {
+    private void startDashAi(Dolphin dolphin) {
         Bukkit.getScheduler().runTaskTimer(OMCPlugin.getInstance(), task -> {
-            if (nautilus.isDead()) {
+            if (dolphin.isDead()) {
                 task.cancel();
                 return;
             }
 
-            Optional<Player> target = nautilus.getLocation().getNearbyPlayers(16).stream()
-                    .min(Comparator.comparingDouble(p -> p.getLocation().distanceSquared(nautilus.getLocation())));
+            Optional<Player> target = dolphin.getLocation().getNearbyPlayers(16).stream()
+                    .min(Comparator.comparingDouble(p -> p.getLocation().distanceSquared(dolphin.getLocation())));
 
-            target.ifPresent(t -> triggerDash(nautilus, t));
+            target.ifPresent(t -> triggerDash(dolphin, t));
         }, 20L, 60L);
     }
 
     /**
-     * Procédure trouvé afin d'activer le dash vanilla du nautilus
-     * @param nautilus le nautilus ciblé
+     * Dash vers la cible. 1.21.7 n'a pas le dash Nautilus, on utilise la vélocité.
+     * @param dolphin le dauphin ciblé
      * @param target la target du dash, le joueur le plus proche
      */
-    private void triggerDash(Nautilus nautilus, LivingEntity target) {
-        nautilus.setMemory(MemoryKey.ANGRY_AT, target.getUniqueId());
-        nautilus.setMemory(MemoryKey.ATTACK_TARGET_COOLDOWN, null);
+    private void triggerDash(Dolphin dolphin, LivingEntity target) {
+        org.bukkit.util.Vector direction = target.getLocation().toVector().subtract(dolphin.getLocation().toVector());
+        if (direction.lengthSquared() < 1.0E-4) {
+            return;
+        }
+        dolphin.setVelocity(direction.normalize().multiply(1.8));
     }
 
     /**
-     * Spawn le passager du nautils, un drowned pouvant varier
-     * @param nautilus le nautilus ciblé
+     * Spawn le passager du dauphin, un drowned pouvant varier
+     * @param dolphin le dauphin ciblé
      */
-    private void spawnPassager(Nautilus nautilus) {
-        Drowned drowned = nautilus.getWorld().spawn(nautilus.getLocation(), Drowned.class);
+    private void spawnPassager(Dolphin dolphin) {
+        Drowned drowned = dolphin.getWorld().spawn(dolphin.getLocation(), Drowned.class);
         if (ThreadLocalRandom.current().nextFloat() < 0.1f)
             drowned.setBaby();
         drowned.setShouldBurnInDay(false);
@@ -105,7 +107,7 @@ public class Leviathan extends CustomMob<Nautilus> {
         if (attackSpeed != null)
             attackSpeed.setBaseValue(6);
 
-        nautilus.addPassenger(drowned);
+        dolphin.addPassenger(drowned);
     }
 
     /**

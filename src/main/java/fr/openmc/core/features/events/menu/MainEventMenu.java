@@ -57,7 +57,7 @@ public class MainEventMenu extends PaginatedMenu {
                 }
 
                 meta.lore(lore);
-            }).setOnClick(_ -> {
+            }).setOnClick(ignored -> {
                 if (event instanceof HasMenu menu) {
                     menu.getInfoMenu(getOwner()).open();
                 }
@@ -88,7 +88,7 @@ public class MainEventMenu extends PaginatedMenu {
         map.put(27, new ItemMenuBuilder(this, Material.CLOCK, meta -> {
             meta.displayName(TranslationManager.translation("feature.events.calendar.title"));
             meta.lore(TranslationManager.translationLore("feature.events.menu.main_event.title.calendar.lore"));
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 new CalendarMenu(getOwner()).open()));
 
         map.put(30, ItemMenuTemplate.BTN_PREVIOUS_PAGE_WHITE.apply(this));

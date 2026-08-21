@@ -37,13 +37,13 @@ public class SeaGuard extends CustomMob<Drowned> {
 
         Random random = ThreadLocalRandom.current();
         if (random.nextBoolean())
-            drowned.getEquipment().setHelmet(ItemStack.of(Material.COPPER_HELMET));
+            drowned.getEquipment().setHelmet(ItemStack.of(Material.CHAINMAIL_HELMET));
         if (random.nextBoolean())
-            drowned.getEquipment().setChestplate(ItemStack.of(Material.COPPER_CHESTPLATE));
+            drowned.getEquipment().setChestplate(ItemStack.of(Material.CHAINMAIL_CHESTPLATE));
         if (random.nextBoolean())
             drowned.getEquipment().setLeggings(ItemStack.of(Material.IRON_LEGGINGS));
         if (random.nextBoolean())
-            drowned.getEquipment().setBoots(ItemStack.of(Material.COPPER_BOOTS));
+            drowned.getEquipment().setBoots(ItemStack.of(Material.CHAINMAIL_BOOTS));
         if (random.nextBoolean())
             drowned.getEquipment().setItemInMainHand(getDrownedTrident());
 

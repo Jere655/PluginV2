@@ -68,8 +68,8 @@ public class OMCDatapack {
      * @throws IOException
      */
     public void buildRuntime(Runnable onBuilded) throws IOException {
-        Path dir = OMCPlugin.getInstance().getServer()
-                .getLevelDirectory()
+        Path dir = OMCPlugin.getInstance().getServer().getWorldContainer().toPath()
+                .resolve("world")
                 .resolve("datapacks")
                 .resolve(ID_TEMP_DATAPACK_FOLDER);
 
@@ -102,7 +102,8 @@ public class OMCDatapack {
     }
 
     public void cleanupRumtime() throws IOException {
-        Path dir = OMCPlugin.getInstance().getServer().getLevelDirectory()
+        Path dir = OMCPlugin.getInstance().getServer().getWorldContainer().toPath()
+                .resolve("world")
                 .resolve("datapacks")
                 .resolve(ID_TEMP_DATAPACK_FOLDER);
         FilesUtils.deleteDirectory(dir.toFile());

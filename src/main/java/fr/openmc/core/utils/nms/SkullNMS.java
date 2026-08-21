@@ -13,7 +13,7 @@ public class SkullNMS {
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
         ItemStack skull = new ItemStack(Items.PLAYER_HEAD);
 
-        ResolvableProfile profile = ResolvableProfile.createResolved(nmsPlayer.getGameProfile());
+        ResolvableProfile profile = new ResolvableProfile(nmsPlayer.getGameProfile());
 
         skull.set(DataComponents.PROFILE, profile);
         return skull;

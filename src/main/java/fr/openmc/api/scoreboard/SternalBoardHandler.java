@@ -1,6 +1,7 @@
 package fr.openmc.api.scoreboard;
 
 import lombok.Getter;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.numbers.BlankFormat;
 import net.minecraft.network.chat.numbers.FixedFormat;
 import net.minecraft.network.protocol.Packet;
@@ -425,7 +426,7 @@ public abstract class SternalBoardHandler<T> {
         team.setPlayerSuffix((net.minecraft.network.chat.Component) toMinecraftComponent(suffix));
         team.setNameTagVisibility(Team.Visibility.ALWAYS);
         team.setCollisionRule(Team.CollisionRule.ALWAYS);
-        team.setColor(Optional.of(TeamColor.WHITE));
+        team.setColor(ChatFormatting.WHITE);
         team.unpackOptions((byte) 0x00);
         scoreboard.addPlayerToTeam(COLOR_CODES[score], team);
 

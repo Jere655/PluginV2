@@ -73,7 +73,7 @@ public class RTPCommands {
 
             World world = player.getWorld();
 
-            world.getChunkAtAsync(chunkX, chunkZ).thenAccept(_ -> {
+            world.getChunkAtAsync(chunkX, chunkZ).thenAccept(ignored -> {
                 Bukkit.getScheduler().runTask(OMCPlugin.getInstance(), () -> {
                     Location loc = world.getHighestBlockAt(coords[0], coords[1]).getLocation();
 

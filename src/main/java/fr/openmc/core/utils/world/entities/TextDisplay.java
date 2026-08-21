@@ -36,7 +36,7 @@ public class TextDisplay {
     public TextDisplay(Component text, Location location, Vector3f scale) {
         this.location = location;
 
-        textDisplay = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, ((CraftWorld) location.getWorld()).getHandle());
+        textDisplay = new Display.TextDisplay(EntityType.TEXT_DISPLAY, ((CraftWorld) location.getWorld()).getHandle());
         textDisplay.setPos(location.getX(), location.getY(), location.getZ());
         textDisplay.setRot(location.getYaw(), location.getPitch());
         textDisplay.setBillboardConstraints(Display.BillboardConstraints.CENTER);
@@ -69,7 +69,7 @@ public class TextDisplay {
                 textDisplay.getZ(),
                 textDisplay.getXRot(),
                 textDisplay.getYRot(),
-                EntityTypes.TEXT_DISPLAY,
+                EntityType.TEXT_DISPLAY,
                 0,
                 Vec3.ZERO,
                 0

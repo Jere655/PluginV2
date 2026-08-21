@@ -3,7 +3,7 @@ package fr.openmc.core.features.dream;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import org.bukkit.Bukkit;
-import org.bukkit.GameRules;
+import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -50,15 +50,14 @@ public class DreamDimensionManager {
             DREAM_WORLD.setTicksPerSpawns(SpawnCategory.ANIMAL, 30);
 
             // ** SET GAMERULE FOR THE WORLD **
-            DREAM_WORLD.setGameRule(GameRules.ADVANCE_TIME, false);
-            DREAM_WORLD.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
-            DREAM_WORLD.setGameRule(GameRules.ADVANCE_WEATHER, false);
-            DREAM_WORLD.setGameRule(GameRules.RAIDS, true);
-            DREAM_WORLD.setGameRule(GameRules.SPAWN_PATROLS, false);
-            DREAM_WORLD.setGameRule(GameRules.SPAWN_WANDERING_TRADERS, false);
-            DREAM_WORLD.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
-            DREAM_WORLD.setGameRule(GameRules.LOCATOR_BAR, false);
-            DREAM_WORLD.setGameRule(GameRules.ALLOW_ENTERING_NETHER_USING_PORTALS, false);
+            DREAM_WORLD.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+            DREAM_WORLD.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+            DREAM_WORLD.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+            DREAM_WORLD.setGameRule(GameRule.DISABLE_RAIDS, false);
+            DREAM_WORLD.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+            DREAM_WORLD.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
+            DREAM_WORLD.setGameRule(GameRule.NATURAL_REGENERATION, false);
+            DREAM_WORLD.setGameRule(GameRule.LOCATOR_BAR, false);
 
             // ** SET WORLD BORDER AND TIME **
             DREAM_WORLD.getWorldBorder().setSize(10000);

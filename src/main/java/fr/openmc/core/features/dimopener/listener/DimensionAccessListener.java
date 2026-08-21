@@ -4,6 +4,7 @@ import fr.openmc.core.features.dimopener.DimensionOpenerManager;
 import fr.openmc.core.features.dimopener.DimensionProgress;
 import fr.openmc.core.features.dimopener.DimensionState;
 import fr.openmc.core.features.dimopener.data.DimensionData;
+import fr.openmc.core.features.dream.DreamDimensionManager;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
@@ -31,6 +32,11 @@ public class DimensionAccessListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerPortal(PlayerPortalEvent event) {
+        if (DreamDimensionManager.DIMENSION_NAME.equals(event.getPlayer().getWorld().getName())
+                && event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
+            event.setCancelled(true);
+            return;
+        }
         Location to = event.getTo();
         if (to == null || to.getWorld() == null) return;
         checkAccess(event.getPlayer(), to.getWorld().getName(), event);

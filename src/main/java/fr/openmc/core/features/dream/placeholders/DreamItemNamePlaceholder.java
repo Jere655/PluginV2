@@ -5,6 +5,7 @@ import fr.openmc.core.features.dream.models.registry.items.DreamItemMeta;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
 import fr.openmc.core.hooks.itemsadder.placeholders.IAPlaceholder;
 import fr.openmc.core.utils.text.messages.TranslationManager;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class DreamItemNamePlaceholder implements IAPlaceholder {
     private static final String PLACEHOLDER_NAME = "dream_item_name";
@@ -22,8 +23,9 @@ public class DreamItemNamePlaceholder implements IAPlaceholder {
 
         if (item == null || !(item.getMeta() instanceof DreamItemMeta d)) return null;
 
-        return "<" + d.getRarity().getColor().name() + ">" +
+        String colorName = NamedTextColor.NAMES.key(d.getRarity().getColor());
+        return "<" + colorName + ">" +
                 "<lang:" + TranslationManager.getTranslationKey(d.getName()) +
-                "></"+ d.getRarity().getColor().name() + ">";
+                "></"+ colorName + ">";
     }
 }

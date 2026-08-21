@@ -59,8 +59,8 @@ public class ParticleUtils {
         PARTICLE_FALLBACKS.put("entity_effect", () -> Color.WHITE);
         PARTICLE_FALLBACKS.put("tinted_leaves", () -> Color.WHITE);
         PARTICLE_FALLBACKS.put("flash", () -> Color.WHITE);
-        PARTICLE_FALLBACKS.put("effect", () -> new Particle.Spell(Color.WHITE, 1.0f));
-        PARTICLE_FALLBACKS.put("instant_effect", () -> new Particle.Spell(Color.WHITE, 1.0f));
+        PARTICLE_FALLBACKS.put("effect", () -> Color.WHITE);
+        PARTICLE_FALLBACKS.put("instant_effect", () -> Color.WHITE);
     }
 
     public static void sendRandomCubeParticles(Player player, Particle particle, double radius, int amount) {

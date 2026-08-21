@@ -4,10 +4,8 @@ import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -17,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class ToastUtils {
-    private static final Identifier TOAST_IDENTIFIER = Identifier.fromNamespaceAndPath("omc", "custom_toast");
+    private static final ResourceLocation TOAST_IDENTIFIER = ResourceLocation.fromNamespaceAndPath("omc", "custom_toast");
     private static final AdvancementRequirements ADV_REQUIREMENTS = AdvancementRequirements.allOf(Set.of("c"));
 
     /**
@@ -52,10 +50,10 @@ public class ToastUtils {
         Advancement adv = new Advancement(
                 Optional.empty(),
                 Optional.of(new DisplayInfo(
-                        ItemStackTemplate.fromNonEmptyStack(ItemStack.fromBukkitCopy(item)),
+                        org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item),
                         PaperAdventure.asVanilla(name),
                         PaperAdventure.asVanilla(description),
-                        Optional.empty(),
+                        null,
                         type,
                         true,
                         false,

@@ -6,21 +6,19 @@ import fr.openmc.core.registry.loottable.loots.XpLoot;
 import fr.openmc.core.registry.mobs.CustomMob;
 import fr.openmc.core.utils.RandomUtils;
 import fr.openmc.core.utils.text.messages.TranslationManager;
-import io.papermc.paper.datacomponent.item.ResolvableProfile;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Mannequin;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.List;
-import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
-public class PoissonSteve extends CustomMob<Mannequin> {
+public class PoissonSteve extends CustomMob<ArmorStand> {
     public PoissonSteve(String id) {
         super(id,
                 TranslationManager.translation("feature.dailyevents.miraculousfishing.mob.poisson_steve"),
-                Mannequin.class,
+                ArmorStand.class,
                 50,
                 67,
                 RandomUtils.randomBetween(0.1, 0.1),
@@ -35,14 +33,16 @@ public class PoissonSteve extends CustomMob<Mannequin> {
     }
 
     @Override
-    public Mannequin spawn(Location spawnLocation) {
-        Mannequin mannequin = this.getPreBuildMob(spawnLocation);
-
-        mannequin.setDescription(Component.empty());
-
-        mannequin.setProfile(ResolvableProfile.resolvableProfile()
-                .uuid(UUID.fromString("d715d08e-c54c-45e6-b6d0-fe6caf2716a7"))
-                .build());
+    public ArmorStand spawn(Location spawnLocation) {
+        ArmorStand mannequin = this.getPreBuildMob(spawnLocation);
+        mannequin.setArms(true);
+        mannequin.setBasePlate(false);
+        mannequin.setCanPickupItems(false);
+        mannequin.setDisabledSlots(
+                EquipmentSlot.HAND, EquipmentSlot.OFF_HAND,
+                EquipmentSlot.FEET, EquipmentSlot.LEGS,
+                EquipmentSlot.CHEST, EquipmentSlot.HEAD
+        );
         mannequin.getEquipment().setHelmet(OMCRegistry.CUSTOM_ITEMS.POISSON_STEVE_HEAD.getBest());
 
         return mannequin;

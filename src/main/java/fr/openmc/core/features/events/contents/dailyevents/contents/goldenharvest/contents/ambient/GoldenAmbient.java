@@ -8,7 +8,7 @@ import fr.openmc.core.registry.ambient.builder.AmbientBuilder;
 import fr.openmc.core.utils.nms.WeatherType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
+import fr.openmc.api.datapacks.builders.DimensionTypeBuilder;
 
 public class GoldenAmbient extends CustomAmbient {
     @Override
@@ -43,7 +43,7 @@ public class GoldenAmbient extends CustomAmbient {
                                 )
                         )
                 )
-                .skybox(DimensionType.Skybox.OVERWORLD)
+                .skybox(DimensionTypeBuilder.Skybox.OVERWORLD)
                 .hasSkylight(true)
                 .defaultClock("overworld")
                 .timelines("#minecraft:in_overworld")

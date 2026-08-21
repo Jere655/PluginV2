@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import fr.openmc.api.datapacks.injectors.TimelinesInjector;
-import net.minecraft.world.level.dimension.DimensionType;
 
 /**
  * Exemple simple d'un dimension type :
@@ -33,6 +32,31 @@ import net.minecraft.world.level.dimension.DimensionType;
  * }
  */
 public final class DimensionTypeBuilder {
+    /**
+     * 1.21.7 has no DimensionType.Skybox. These names map to the {@code effects} field
+     * (overworld / nether / end sky and fog).
+     */
+    public enum Skybox {
+        OVERWORLD("minecraft:overworld"),
+        NETHER("minecraft:the_nether"),
+        END("minecraft:the_end"),
+        NONE("minecraft:the_nether");
+
+        private final String effects;
+
+        Skybox(String effects) {
+            this.effects = effects;
+        }
+
+        public String getSerializedName() {
+            return name().toLowerCase();
+        }
+
+        public String getEffects() {
+            return effects;
+        }
+    }
+
     private JsonObject attributes;
     private Double ambientLight = 0.0;
     private Double coordinateScale = 1.0;
@@ -96,7 +120,7 @@ public final class DimensionTypeBuilder {
         return this;
     }
 
-    public DimensionTypeBuilder skybox(DimensionType.Skybox skybox) {
+    public DimensionTypeBuilder skybox(Skybox skybox) {
         return skybox(skybox.getSerializedName());
     }
 
@@ -161,24 +185,53 @@ public final class DimensionTypeBuilder {
 
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
-        if (attributes != null) json.add("attributes", attributes);
-        if (ambientLight != null) json.addProperty("ambient_light", ambientLight);
-        if (coordinateScale != null) json.addProperty("coordinate_scale", coordinateScale);
-        if (defaultClock != null) json.addProperty("default_clock", defaultClock);
-        if (hasCeiling != null) json.addProperty("has_ceiling", hasCeiling);
-        if (hasEnderDragonFlight != null) json.addProperty("has_ender_dragon_fight", hasEnderDragonFlight);
-        if (hasSkylight != null) json.addProperty("has_skylight", hasSkylight);
-        if (hasFixedTime != null) json.addProperty("has_fixed_time", hasFixedTime);
-        if (skybox != null) json.addProperty("skybox", skybox);
-        if (cardinalLight != null) json.addProperty("cardinal_light", cardinalLight);
-        if (height != null) json.addProperty("height", height);
-        if (infiniburn != null) json.addProperty("infiniburn", infiniburn);
+        // 1.21.7 dimension_type codec. 26.2-only fields (skybox, attributes, timelines,
+        // default_clock, cardinal_light) are mapped or omitted so the datapack loads.
+        json.addProperty("ultrawarm", false);
+        json.addProperty("natural", true);
+        json.addProperty("piglin_safe", false);
+        json.addProperty("respawn_anchor_works", false);
+        json.addProperty("bed_works", true);
+        json.addProperty("has_raids", true);
         if (logicalHeight != null) json.addProperty("logical_height", logicalHeight);
         if (minY != null) json.addProperty("min_y", minY);
-        if (monsterSpawnBlockLightLimit != null) json.addProperty("monster_spawn_block_light_limit", monsterSpawnBlockLightLimit);
+        if (height != null) json.addProperty("height", height);
+        if (coordinateScale != null) json.addProperty("coordinate_scale", coordinateScale);
+        if (ambientLight != null) json.addProperty("ambient_light", ambientLight);
+        if (hasSkylight != null) json.addProperty("has_skylight", hasSkylight);
+        if (hasCeiling != null) json.addProperty("has_ceiling", hasCeiling);
+        json.addProperty("infiniburn", normalizeInfiniburn(infiniburn));
+        json.addProperty("effects", effectsFromSkybox(skybox));
         if (monsterSpawnLightLevel != null) json.add("monster_spawn_light_level", monsterSpawnLightLevel);
-        if (timelines != null) json.addProperty("timelines", timelines);
+        if (monsterSpawnBlockLightLimit != null) json.addProperty("monster_spawn_block_light_limit", monsterSpawnBlockLightLimit);
+        if (Boolean.TRUE.equals(hasFixedTime)) {
+            json.addProperty("fixed_time", 18000);
+        }
         return json;
+    }
+
+    private static String normalizeInfiniburn(String infiniburn) {
+        if (infiniburn == null || infiniburn.isBlank()) {
+            return "#minecraft:infiniburn_overworld";
+        }
+        if (infiniburn.startsWith("#minecraft:")) {
+            return infiniburn;
+        }
+        if (infiniburn.startsWith("#")) {
+            return "#minecraft:" + infiniburn.substring(1);
+        }
+        return infiniburn;
+    }
+
+    private static String effectsFromSkybox(String skybox) {
+        if (skybox == null) {
+            return Skybox.OVERWORLD.getEffects();
+        }
+        return switch (skybox.toLowerCase()) {
+            case "end", "the_end", "minecraft:the_end" -> Skybox.END.getEffects();
+            case "nether", "the_nether", "minecraft:the_nether", "none" -> Skybox.NETHER.getEffects();
+            default -> Skybox.OVERWORLD.getEffects();
+        };
     }
 
     private JsonObject toOverridenEnvironnementAttribute(JsonElement value) {

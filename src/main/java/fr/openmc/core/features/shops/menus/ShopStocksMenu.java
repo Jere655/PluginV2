@@ -77,7 +77,7 @@ public class ShopStocksMenu extends PaginatedMenu {
             itemMeta.displayName(item.isFull() ?
                     TranslationManager.translation("feature.shop.menu.stocks.fill.name.full") :
                     TranslationManager.translation("feature.shop.menu.stocks.fill.name.not_full", Component.text(barrelStocks).color(NamedTextColor.GREEN)));
-        }).setOnClick(_ -> {
+        }).setOnClick(ignored -> {
             if (barrelStocks == 0) return;
             if (item.isFull()) return;
             
@@ -94,7 +94,7 @@ public class ShopStocksMenu extends PaginatedMenu {
         map.put(50, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.COMPANY_BOX.getBest(), itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stocks.empty.name"));
             itemMeta.lore(TranslationManager.translationLore("feature.shop.menu.stocks.empty.lore", Component.text(item.getAmount()).color(NamedTextColor.GRAY)));
-        }).setOnClick(_ -> {
+        }).setOnClick(ignored -> {
             if (item.getAmount() <= 0) return;
             if (!ItemUtils.hasEnoughSpace(getOwner(), item.getItemStack(), item.getAmount())) {
                 MessagesManager.sendMessage(getOwner(), TranslationManager.translation("feature.shop.menu.stocks.empty.not_enough_space"), Prefix.SHOP, MessageType.ERROR, true);

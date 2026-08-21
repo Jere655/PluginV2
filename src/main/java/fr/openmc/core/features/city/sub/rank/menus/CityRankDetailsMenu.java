@@ -136,7 +136,7 @@ public class CityRankDetailsMenu extends Menu {
 		map.put(8, new ItemMenuBuilder(this, this.newRank.getIcon(), itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.icon.title"));
 			itemMeta.lore(TranslationManager.translationLore("feature.city.rank.menu.details.icon.lore.create"));
-		}).setOnClick(_ -> new CityRankIconMenu(getOwner(), city, 0, oldRank, newRank, null).open())
+		}).setOnClick(ignored -> new CityRankIconMenu(getOwner(), city, 0, oldRank, newRank, null).open())
 				.hide(getDataComponentType()));
 		
 		map.put(13, new ItemMenuBuilder(this, Material.WRITABLE_BOOK, itemMeta -> {
@@ -148,18 +148,18 @@ public class CityRankDetailsMenu extends Menu {
 					"feature.city.rank.menu.details.perms.lore.create",
 					permValue.color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false)
 			));
-		}).setOnClick(_ -> new CityRankPermsMenu(getOwner(), oldRank, newRank, true, 0).open()));
+		}).setOnClick(ignored -> new CityRankPermsMenu(getOwner(), oldRank, newRank, true, 0).open()));
 		
 		map.put(18, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.REFUSE_BTN, itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.cancel_create.title"));
 			itemMeta.lore(TranslationManager.translationLore("feature.city.rank.menu.details.cancel_create.lore"));
-		}).setOnClick(_ -> getOwner().closeInventory()));
+		}).setOnClick(ignored -> getOwner().closeInventory()));
 		
 		if (canManageRanks) {
 			map.put(26, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.ACCEPT_BTN, itemMeta -> {
 				itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.create.title"));
 				itemMeta.lore(TranslationManager.translationLore("feature.city.rank.menu.details.create.lore"));
-			}).setOnClick(_ -> {
+			}).setOnClick(ignored -> {
 				city.createRank(newRank.validate(getOwner()));
 				getOwner().closeInventory();
 				MessagesManager.sendMessage(getOwner(), TranslationManager.translation(
@@ -226,7 +226,7 @@ public class CityRankDetailsMenu extends Menu {
 		map.put(4, new ItemMenuBuilder(this, Material.OAK_SIGN, itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.name.title"));
 			itemMeta.lore(loreName);
-		}).setOnClick(_ -> {
+		}).setOnClick(ignored -> {
 			if (!canManageRanks) return;
 			
 			CityRankAction.renameRankFromMenu(getOwner(), oldRank, newRank);
@@ -249,7 +249,7 @@ public class CityRankDetailsMenu extends Menu {
 		map.put(8, new ItemMenuBuilder(this, this.newRank.getIcon(), itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.icon.title"));
 			itemMeta.lore(loreIcon);
-		}).setOnClick(_ -> {
+		}).setOnClick(ignored -> {
 			if (!canManageRanks) return;
 			
 			new CityRankIconMenu(getOwner(), city, 0, oldRank, newRank, null).open();
@@ -279,7 +279,7 @@ public class CityRankDetailsMenu extends Menu {
 		map.put(13, new ItemMenuBuilder(this, Material.WRITABLE_BOOK, itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.perms.title"));
 			itemMeta.lore(lorePerm);
-		}).setOnClick(_ -> {
+		}).setOnClick(ignored -> {
 			if (!canManageRanks) new CityRankPermsMenu(getOwner(), oldRank, newRank, false, 0).open();
 			else new CityRankPermsMenu(getOwner(), oldRank, newRank, true, 0).open();
 		}));
@@ -287,7 +287,7 @@ public class CityRankDetailsMenu extends Menu {
 		map.put(18, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.REFUSE_BTN, itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.cancel_edit.title"));
 			itemMeta.lore(TranslationManager.translationLore("feature.city.rank.menu.details.cancel_edit.lore"));
-		}).setOnClick(_ -> {
+		}).setOnClick(ignored -> {
 			new CityRanksMenu(getOwner(), city).open();
 			MessagesManager.sendMessage(getOwner(), TranslationManager.translation("feature.city.rank.update.cancelled"), Prefix.CITY, MessageType.SUCCESS, false);
 		}));
@@ -296,14 +296,14 @@ public class CityRankDetailsMenu extends Menu {
 			map.put(22, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.MINUS_BTN, itemMeta -> {
 				itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.delete.title"));
 				itemMeta.lore(TranslationManager.translationLore("feature.city.rank.menu.details.delete.lore"));
-			}).setOnClick(_ ->
+			}).setOnClick(ignored ->
 					CityRankAction.deleteRank(getOwner(), oldRank.getName())
 			));
 			
 			map.put(26, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.ACCEPT_BTN, itemMeta -> {
 				itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.details.save.title"));
 				itemMeta.lore(TranslationManager.translationLore("feature.city.rank.menu.details.save.lore"));
-			}).setOnClick(_ -> {
+			}).setOnClick(ignored -> {
 				city.updateRank(this.oldRank, newRank.validate(getOwner()));
 				new CityRanksMenu(getOwner(), city).open();
 				MessagesManager.sendMessage(getOwner(), TranslationManager.translation(

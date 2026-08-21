@@ -85,7 +85,7 @@ public class InteractProtection implements Listener {
     private final Set<EntityType> INTERACTION_REFUSED = new HashSet<>(Set.of(
             EntityType.ITEM_FRAME,
             EntityType.GLOW_ITEM_FRAME,
-            EntityType.SULFUR_CUBE
+            EntityType.MAGMA_CUBE
     ));
 
     @EventHandler

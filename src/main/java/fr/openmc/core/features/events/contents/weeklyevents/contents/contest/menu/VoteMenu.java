@@ -259,7 +259,7 @@ public class VoteMenu extends Menu {
         inventory.put(35, new ItemMenuBuilder(this, Material.EMERALD, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.events.contest.vote.info.name"));
             itemMeta.lore(loreInfo);
-        }).setOnClick(_ -> new MoreInfoMenu(player).open()));
+        }).setOnClick(ignored -> new MoreInfoMenu(player).open()));
 
         return inventory;
     }

@@ -26,7 +26,7 @@ public class BloodyNightRaidManager {
             EntityType.CREEPER,
             EntityType.HUSK,
             EntityType.STRAY,
-            EntityType.PARCHED,
+            EntityType.WITHER_SKELETON,
             EntityType.BOGGED
     );
 

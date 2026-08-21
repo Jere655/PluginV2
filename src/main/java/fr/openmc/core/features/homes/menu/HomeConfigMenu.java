@@ -87,7 +87,7 @@ public class HomeConfigMenu extends Menu {
         content.put(24, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.HOMES_ICON_BIN_RED, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.homes.config.delete.name"));
             itemMeta.lore(TranslationManager.translationLore("feature.homes.config.delete.lore"));
-        }).setOnClick(_ -> new HomeDeleteConfirmMenu(getOwner(), home).open()));
+        }).setOnClick(ignored -> new HomeDeleteConfirmMenu(getOwner(), home).open()));
 
         content.put(36, ItemMenuTemplate.BTN_PREVIOUS_PAGE_WHITE.apply(this).setBackButton());
         content.put(44, ItemMenuTemplate.BTN_CLOSE.apply(this));

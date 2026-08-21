@@ -53,7 +53,7 @@ public class BloodyMonsterMenu extends Menu {
             itemMeta.lore(TranslationManager.translationLore(
                     "feature.dailyevents.bloody_night.menu.info.bloody_monster.lore",
                     Component.text(BloodyNightManager.CORRUPTED_CHANCE * 100 + "%", NamedTextColor.DARK_RED)));
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.CORRUPTED_MOB.openMenu(getOwner())));
 
         inventory.put(12, new ItemMenuBuilder(this, Material.RED_DYE, itemMeta -> {
@@ -61,7 +61,7 @@ public class BloodyMonsterMenu extends Menu {
             itemMeta.lore(TranslationManager.translationLore(
                     "feature.dailyevents.bloody_night.menu.info.bloody_monster.lore",
                     Component.text(BloodyNightManager.CURSED_CHANCE * 100 + "%", NamedTextColor.RED)));
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.CURSED_MOB.openMenu(getOwner())));
 
         inventory.put(14, new ItemMenuBuilder(this, Material.PURPLE_DYE, itemMeta -> {
@@ -69,7 +69,7 @@ public class BloodyMonsterMenu extends Menu {
             itemMeta.lore(TranslationManager.translationLore(
                     "feature.dailyevents.bloody_night.menu.info.bloody_monster.lore",
                     Component.text(BloodyNightManager.ENRAGED_CHANCE * 100 + "%", NamedTextColor.DARK_PURPLE)));
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.ENRAGED_MOB.openMenu(getOwner())));
 
         inventory.put(15, new ItemMenuBuilder(this, Material.YELLOW_DYE, itemMeta -> {
@@ -77,7 +77,7 @@ public class BloodyMonsterMenu extends Menu {
             itemMeta.lore(TranslationManager.translationLore(
                     "feature.dailyevents.bloody_night.menu.info.bloody_monster.lore",
                     Component.text(BloodyNightManager.ANCIENT_CHANCE * 100 + "%", NamedTextColor.YELLOW)));
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.ANCIENT_MOB.openMenu(getOwner())));
 
         inventory.put(18, new ItemMenuBuilder(this, Material.ARROW, true));

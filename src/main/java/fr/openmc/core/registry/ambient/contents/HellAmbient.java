@@ -6,7 +6,7 @@ import fr.openmc.core.registry.ambient.CustomAmbientRegistry;
 import fr.openmc.core.registry.ambient.builder.AmbientBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
+import fr.openmc.api.datapacks.builders.DimensionTypeBuilder;
 import org.bukkit.Particle;
 
 public class HellAmbient extends CustomAmbient {
@@ -33,7 +33,7 @@ public class HellAmbient extends CustomAmbient {
                 .ambientLight(0.1f)
                 .cardinalLight("nether")
                 .timelines("#minecraft:in_nether")
-                .skybox(DimensionType.Skybox.NONE)
+                .skybox(DimensionTypeBuilder.Skybox.NONE)
                 .hasSkylight(false)
                 .hasCeiling(true)
                 .hasFixedTime(true);

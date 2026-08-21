@@ -72,7 +72,7 @@ public class LootsInfoMenu extends PaginatedMenu {
                 }
 
                 meta.lore(lore);
-            }).setOnClick(_ -> {
+            }).setOnClick(ignored -> {
                 if (loot instanceof TableLoot subLootTable) {
                     subLootTable.getLootTable().openMenu(getOwner());
                 } else if (loot instanceof LootboxLoot lootboxLoot) {

@@ -68,7 +68,7 @@ public class PlayerSettingsMenu extends PaginatedMenu {
         buttons.put(45, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.HOMES_ICON_BIN_RED, meta -> {
             meta.displayName(TranslationManager.translation("feature.settings.reset.title")
                     .decoration(TextDecoration.ITALIC, false));
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 new ConfirmMenu(getOwner(), () -> {
                     settings.resetAllSettings();
                     this.refresh();

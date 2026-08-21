@@ -93,7 +93,7 @@ public class CityRanksMenu extends Menu {
 									).color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
 							));
 						}
-				).setOnClick(_ -> new CityRankDetailsMenu(player, city, rank).open())
+				).setOnClick(ignored -> new CityRankDetailsMenu(player, city, rank).open())
 						.hide(getDataComponentType()));
 				if (i >= 17) break;
 				i++;
@@ -104,7 +104,7 @@ public class CityRanksMenu extends Menu {
 				itemMeta -> {
 					itemMeta.displayName(TranslationManager.translation("messages.menus.back"));
 					itemMeta.lore(List.of(TranslationManager.translation("messages.menus.back_lore")));
-				}).setOnClick(_ -> new CityMenu(getOwner()).open()));
+				}).setOnClick(ignored -> new CityMenu(getOwner()).open()));
 		
 		
 		if (canAssignRanks) {
@@ -116,7 +116,7 @@ public class CityRanksMenu extends Menu {
 							itemMeta -> {
 								itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.list.assign.title"));
 								itemMeta.lore(loreAssignRanks);
-							}).setOnClick(_ -> {
+							}).setOnClick(ignored -> {
 						if (city.getRanks().isEmpty()) return;
 						
 						new CityRankMemberMenu(player, city).open();
@@ -131,7 +131,7 @@ public class CityRanksMenu extends Menu {
 					itemMeta -> {
 						itemMeta.displayName(TranslationManager.translation("feature.city.rank.menu.list.create.title"));
 						itemMeta.lore(loreCreateRank);
-					}).setOnClick(_ -> CityRankAction.beginCreateRank(player))
+					}).setOnClick(ignored -> CityRankAction.beginCreateRank(player))
 			);
 		}
 		return map;

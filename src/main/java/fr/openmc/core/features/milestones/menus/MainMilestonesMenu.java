@@ -62,7 +62,7 @@ public class MainMilestonesMenu extends Menu {
             itemMeta.displayName(tutoMilestone.getName().decoration(TextDecoration.ITALIC, false));
             itemMeta.lore(tutoMilestone.getDescription());
             itemMeta.setEnchantmentGlintOverride(MilestonesManager.getPlayerStep(tutoMilestone.getType(), player) + 1 >= tutoMilestone.getSteps().size());
-        }).setOnClick(_ -> tutoMilestone.getMenu(player).open()));
+        }).setOnClick(ignored -> tutoMilestone.getMenu(player).open()));
         
 	    List<Component> loreMilestoneVille = new ArrayList<>();
         

@@ -85,7 +85,7 @@ public class InvitationsMenu extends PaginatedMenu {
             items.add(new ItemMenuBuilder(this, Material.PAPER, itemMeta -> {
                 itemMeta.itemName(invitationName);
                 itemMeta.lore(invitationLore);
-            }).setOnClick(_ -> {
+            }).setOnClick(ignored -> {
                 OMCPlayer omcPlayer = OMCPlayer.of(player);
                 OMCPlayer omcInviter = OMCPlayer.of(inviter);
                 new ConfirmMenu(player,

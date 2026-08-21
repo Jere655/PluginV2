@@ -2,10 +2,12 @@ package fr.openmc.core.utils.nms;
 
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import net.minecraft.core.Holder;
+import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -13,7 +15,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import net.minecraft.world.level.chunk.Strategy;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
@@ -66,8 +67,8 @@ public class PlayerBiomeNMS {
         int viewDistance = nmsWorld.getServer().getPlayerList().getViewDistance();
         ChunkPos center = nmsPlayer.chunkPosition();
         List<ClientboundChunksBiomesPacket.ChunkBiomeData> biomeDataList = new ArrayList<>();
-        for (int cx = center.x() - viewDistance; cx <= center.x() + viewDistance; cx++) {
-            for (int cz = center.z() - viewDistance; cz <= center.z() + viewDistance; cz++) {
+        for (int cx = center.x - viewDistance; cx <= center.x + viewDistance; cx++) {
+            for (int cz = center.z - viewDistance; cz <= center.z + viewDistance; cz++) {
                 LevelChunk chunk = nmsWorld.getChunkIfLoaded(cx, cz);
                 if (chunk == null) continue;
 
@@ -92,7 +93,7 @@ public class PlayerBiomeNMS {
             ServerPlayer nmsPlayer,
             LevelChunk initialChunk,
             String keyMappedBiome,
-            Function<Identifier, Identifier> identifierModifier) {
+            Function<ResourceLocation, ResourceLocation> identifierModifier) {
         List<ClientboundChunksBiomesPacket.ChunkBiomeData> biomeDataList = new ArrayList<>();
         LevelChunk fakeChunk = PlayerBiomeNMS.getFakeChunkWithMapping(
                 initialChunk,
@@ -108,15 +109,15 @@ public class PlayerBiomeNMS {
     public static void replaceBiomes(
             ServerPlayer nmsPlayer,
             String keyMappedBiome,
-            Function<Identifier, Identifier> identifierModifier) {
+            Function<ResourceLocation, ResourceLocation> identifierModifier) {
         ServerLevel nmsWorld = nmsPlayer.level();
 
         int viewDistance = nmsWorld.getServer().getPlayerList().getViewDistance();
         ChunkPos center = nmsPlayer.chunkPosition();
         List<ClientboundChunksBiomesPacket.ChunkBiomeData> biomeDataList = new ArrayList<>();
 
-        for (int cx = center.x() - viewDistance; cx <= center.x() + viewDistance; cx++) {
-            for (int cz = center.z() - viewDistance; cz <= center.z() + viewDistance; cz++) {
+        for (int cx = center.x - viewDistance; cx <= center.x + viewDistance; cx++) {
+            for (int cz = center.z - viewDistance; cz <= center.z + viewDistance; cz++) {
                 LevelChunk chunk = nmsWorld.getChunkIfLoaded(cx, cz);
                 if (chunk == null) continue;
 
@@ -138,16 +139,16 @@ public class PlayerBiomeNMS {
     public static LevelChunk getFakeChunk(LevelChunk original, ServerLevel level, Holder<Biome> biome) {
         LevelChunk fakeChunk = new LevelChunk(level, original.getPos());
 
-        Strategy<Holder<Biome>> idMap = Strategy.createForBiomes(original.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).asHolderIdMap());
+        IdMap<Holder<Biome>> idMap = original.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).asHolderIdMap();
 
         LevelChunkSection[] originalSections = original.getSections();
         LevelChunkSection[] fakeSections = fakeChunk.getSections();
 
         for (int i = 0; i < originalSections.length; i++) {
             PalettedContainer<Holder<Biome>> container = new PalettedContainer<>(
-                    biome,
                     idMap,
-                    null
+                    biome,
+                    PalettedContainer.Strategy.SECTION_BIOMES
             );
 
             try {
@@ -171,11 +172,11 @@ public class PlayerBiomeNMS {
     private static LevelChunk getFakeChunkWithMapping(
             LevelChunk original,
             String keyMappedBiome,
-            Function<Identifier, Identifier> identifierModifier) {
+            Function<ResourceLocation, ResourceLocation> identifierModifier) {
         LevelChunk fake = new LevelChunk(original.getLevel(), original.getPos());
 
         Registry<Biome> registry = original.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
-        Strategy<Holder<Biome>> idMap = Strategy.createForBiomes(original.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).asHolderIdMap());
+        IdMap<Holder<Biome>> idMap = original.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).asHolderIdMap();
         LevelChunkSection[] originalSections = original.getSections();
         LevelChunkSection[] fakeSections = fake.getSections();
 
@@ -192,24 +193,10 @@ public class PlayerBiomeNMS {
 
             if (originalBiomes == null) continue;
 
-            // ** Si le chunk contient qu'un biome
-            if (originalBiomes.data.palette().getSize() == 1) {
-                Holder<Biome> single = originalBiomes.data.palette().valueFor(0);
-                Holder<Biome> mapped = getMapped(single, registry, keyMappedBiome, identifierModifier);
-
-                PalettedContainer<Holder<Biome>> fakeBiomes1 = new PalettedContainer<>(mapped, idMap, null);
-                try {
-                    SECTION_BIOMES.set(fakeSections[i], fakeBiomes1);
-                } catch (IllegalAccessException e) {
-                    OMCLogger.error("Erreur d'acces à l'attribut biomes d'un levelChunkSetcion");
-                }
-                continue;
-            }
-
             PalettedContainer<Holder<Biome>> fakeBiomes = new PalettedContainer<>(
-                    originalSection.getNoiseBiome(0,0,0),
                     idMap,
-                    null
+                    originalSection.getNoiseBiome(0, 0, 0),
+                    PalettedContainer.Strategy.SECTION_BIOMES
             );
 
             for (int x = 0; x < 4; x++) {
@@ -237,13 +224,13 @@ public class PlayerBiomeNMS {
             Holder<Biome> original,
             Registry<Biome> registry,
             String keyMappedBiome,
-            Function<Identifier, Identifier> identifierModifier) {
-        Identifier originalId = original.unwrapKey().orElseThrow().identifier();
+            Function<ResourceLocation, ResourceLocation> identifierModifier) {
+        ResourceLocation originalId = original.unwrapKey().orElseThrow().location();
         String cacheKey = keyMappedBiome + "/" + originalId;
 
         return BIOME_CACHE.computeIfAbsent(cacheKey, k -> {
-            Identifier mappedId = identifierModifier.apply(originalId);
-            return registry.get(mappedId).orElseThrow();
+            ResourceLocation mappedId = identifierModifier.apply(originalId);
+            return registry.wrapAsHolder(registry.getOrThrow(ResourceKey.create(Registries.BIOME, mappedId)));
         });
     }
 }

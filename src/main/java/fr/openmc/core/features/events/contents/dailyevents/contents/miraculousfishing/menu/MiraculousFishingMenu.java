@@ -66,14 +66,14 @@ public class MiraculousFishingMenu extends Menu {
             itemMeta.displayName(TranslationManager.translation("feature.dailyevents.miraculousfishing.menu.info.sea_creature.name"));
             itemMeta.lore(TranslationManager.translationLore("feature.dailyevents.miraculousfishing.menu.info.sea_creature.lore"));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.SEA_CREATURE.openMenu(getOwner())));
 
         inventory.put(15, new ItemMenuBuilder(this, Material.MAP, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.dailyevents.miraculousfishing.menu.info.loot_table.name"));
             itemMeta.lore(TranslationManager.translationLore("feature.dailyevents.miraculousfishing.menu.info.loot_table.lore"));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.MIRACULOUS_FISHING.openMenu(getOwner())));
 
         inventory.put(18, new ItemMenuBuilder(this, Material.ARROW, true));

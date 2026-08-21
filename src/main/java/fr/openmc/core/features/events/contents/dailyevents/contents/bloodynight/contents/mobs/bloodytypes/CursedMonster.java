@@ -6,7 +6,7 @@ import fr.openmc.core.utils.bukkit.EntityUtils;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import fr.openmc.core.utils.nms.entity.EntityGlowNMS;
 import fr.openmc.core.utils.text.messages.TranslationManager;
-import net.minecraft.world.scores.TeamColor;
+import net.minecraft.ChatFormatting;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
@@ -81,7 +81,7 @@ public class CursedMonster extends CustomMob<Monster> {
         ParticleUtils.spawnDispersingParticles(entity.getLocation(),
                 Particle.REVERSE_PORTAL,
                 10, 35, 0.1D, null);
-        EntityGlowNMS.setGlowingColor(entity, TeamColor.DARK_PURPLE);
+        EntityGlowNMS.setGlowingColor(entity, ChatFormatting.DARK_PURPLE);
     }
 
     public void resetToDefault(Monster entity) {

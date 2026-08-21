@@ -4,7 +4,7 @@ import fr.openmc.core.features.events.contents.dailyevents.contents.bloodynight.
 import fr.openmc.core.registry.mobs.MobAttack;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import org.bukkit.*;
-import org.bukkit.entity.Mannequin;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -19,7 +19,7 @@ public class BloodExplosionAttack implements MobAttack {
 
     @Override
     public void execute() {
-        Mannequin mannequin = boss.getMannequin();
+        ArmorStand mannequin = boss.getMannequin();
 
         if (mannequin == null || !mannequin.isValid() || mannequin.isDead()) return;
 
@@ -49,7 +49,7 @@ public class BloodExplosionAttack implements MobAttack {
         );
     }
 
-    private void damageNearbyPlayers(Mannequin mannequin) {
+    private void damageNearbyPlayers(ArmorStand mannequin) {
         Collection<Player> players = mannequin.getWorld().getNearbyPlayers(
                 mannequin.getLocation(),
                 20

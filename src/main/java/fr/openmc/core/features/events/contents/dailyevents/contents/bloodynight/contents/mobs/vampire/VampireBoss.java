@@ -13,7 +13,7 @@ import fr.openmc.core.registry.mobs.options.MobBossbarImpl;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import fr.openmc.core.utils.world.LocationUtils;
-import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import fr.openmc.core.utils.bukkit.SkullUtils;
 import lombok.Getter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -25,6 +25,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +37,15 @@ import static fr.openmc.core.features.events.contents.dailyevents.contents.blood
 
 @SuppressWarnings("UnstableApiUsage")
 @Getter
-public class VampireBoss extends CustomMob<Mannequin> implements MobBossbarImpl, Listener {
+public class VampireBoss extends CustomMob<ArmorStand> implements MobBossbarImpl, Listener {
     private final Random random = ThreadLocalRandom.current();
     private final List<MobAttack> attacks;
-    private Mannequin mannequin;
+    private ArmorStand mannequin;
 
     public VampireBoss(String id) {
         super(id,
                 TranslationManager.translation("feature.dailyevents.bloody_night.vampire_boss.name"),
-                Mannequin.class,
+                ArmorStand.class,
                 1000,
                 20,
                 0.1,
@@ -59,7 +60,7 @@ public class VampireBoss extends CustomMob<Mannequin> implements MobBossbarImpl,
     }
 
     @Override
-    public Mannequin spawn(Location spawnLocation) {
+    public ArmorStand spawn(Location spawnLocation) {
         startSummoning(spawnLocation);
         return null;
     }
@@ -106,12 +107,18 @@ public class VampireBoss extends CustomMob<Mannequin> implements MobBossbarImpl,
     }
 
     public void summon(Location at) {
-        Mannequin mannequin = this.getPreBuildMob(at);
-        mannequin.setDescription(Component.empty());
-        mannequin.setProfile(ResolvableProfile.resolvableProfile()
-                .uuid(UUID.fromString("2add34b4-2d09-4204-a458-6251b0d24661"))
-                .build()
+        ArmorStand mannequin = this.getPreBuildMob(at);
+        mannequin.setArms(true);
+        mannequin.setBasePlate(false);
+        mannequin.setCanPickupItems(false);
+        mannequin.setDisabledSlots(
+                EquipmentSlot.HAND, EquipmentSlot.OFF_HAND,
+                EquipmentSlot.FEET, EquipmentSlot.LEGS,
+                EquipmentSlot.CHEST, EquipmentSlot.HEAD
         );
+        mannequin.getEquipment().setHelmet(SkullUtils.getPlayerSkull(
+                UUID.fromString("2add34b4-2d09-4204-a458-6251b0d24661")
+        ));
 
 
         new VampireAttackTask(this).runTaskTimer(

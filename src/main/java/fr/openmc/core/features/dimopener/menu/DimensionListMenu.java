@@ -70,7 +70,7 @@ public class DimensionListMenu extends Menu {
                 }
 
                 meta.lore(lore);
-            }).setOnClick(_ -> {
+            }).setOnClick(ignored -> {
                 if (unlocked) new DimensionContributeMenu(getOwner(), dim.getId()).open();
             });
 

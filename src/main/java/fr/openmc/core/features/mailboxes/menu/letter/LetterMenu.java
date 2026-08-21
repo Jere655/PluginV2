@@ -160,7 +160,7 @@ public class LetterMenu extends Menu {
 
         content.put(45, ItemMenuTemplate.BTN_MAILBOX_HOME.apply(this));
         content.put(48, ItemMenuTemplate.BTN_MAILBOX_ACCEPT.apply(this)
-                .setOnClick(_ -> accept(getOwner())));
+                .setOnClick(ignored -> accept(getOwner())));
         content.put(49, new ItemMenuBuilder(this, letterHead));
         content.put(50, ItemMenuTemplate.btn(
                 this,
@@ -175,7 +175,7 @@ public class LetterMenu extends Menu {
                         OMCRegistry.CUSTOM_ITEMS.MAILBOX_REFUSE_BTN, NamedTextColor.DARK_RED, true)
                 .setOnClick(e -> MailboxMenuManager.sendConfirmMenuToCancelLetter(getOwner(), letter)));
         content.put(53, ItemMenuTemplate.BTN_CLOSE.apply(this)
-                .setOnClick(_ -> cancel()));
+                .setOnClick(ignored -> cancel()));
 
         return content;
     }

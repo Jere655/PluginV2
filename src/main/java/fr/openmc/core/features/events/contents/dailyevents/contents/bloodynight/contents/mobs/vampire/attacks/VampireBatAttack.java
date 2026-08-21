@@ -9,7 +9,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.entity.Mannequin;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class VampireBatAttack implements MobAttack {
             ));
         }
 
-        Mannequin mannequin = boss.getMannequin();
+        ArmorStand mannequin = boss.getMannequin();
 
         if (mannequin == null || !mannequin.isValid() || mannequin.isDead()) return;
 
@@ -74,7 +74,7 @@ public class VampireBatAttack implements MobAttack {
         }
     }
 
-    private Location getRandomSpawnLocation(Mannequin mannequin) {
+    private Location getRandomSpawnLocation(ArmorStand mannequin) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
 
         double angle = random.nextDouble(0, Math.PI * 2);

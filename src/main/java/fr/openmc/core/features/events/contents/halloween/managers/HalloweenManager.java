@@ -138,12 +138,9 @@ public class HalloweenManager extends Feature implements HasDatabase, HasCommand
                     customPumpkin.unsetData(DataComponentTypes.FOOD);
 
 
-                    Registry<DamageType> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.DAMAGE_TYPE);
-                    Tag<DamageType> fireTag = registry.getTag(DamageTypeTagKeys.IS_FIRE);
-
                     customPumpkin.setData(
                             DataComponentTypes.DAMAGE_RESISTANT,
-                            DamageResistant.damageResistant(fireTag)
+                            DamageResistant.damageResistant(DamageTypeTagKeys.IS_FIRE)
                     );
 
                     customPumpkin.editMeta(meta -> {
@@ -162,12 +159,9 @@ public class HalloweenManager extends Feature implements HasDatabase, HasCommand
                     customPumpkin.unsetData(DataComponentTypes.CONSUMABLE);
                     customPumpkin.unsetData(DataComponentTypes.FOOD);
 
-                    Registry<DamageType> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.DAMAGE_TYPE);
-                    Tag<DamageType> fireTag = registry.getTag(DamageTypeTagKeys.IS_FIRE);
-
                     customPumpkin.setData(
                             DataComponentTypes.DAMAGE_RESISTANT,
-                            DamageResistant.damageResistant(fireTag)
+                            DamageResistant.damageResistant(DamageTypeTagKeys.IS_FIRE)
                     );
 
                     customPumpkin.editMeta(meta -> {
@@ -186,12 +180,9 @@ public class HalloweenManager extends Feature implements HasDatabase, HasCommand
                     customPumpkin.unsetData(DataComponentTypes.CONSUMABLE);
                     customPumpkin.unsetData(DataComponentTypes.FOOD);
 
-                    Registry<DamageType> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.DAMAGE_TYPE);
-                    Tag<DamageType> fireTag = registry.getTag(DamageTypeTagKeys.IS_FIRE);
-
                     customPumpkin.setData(
                             DataComponentTypes.DAMAGE_RESISTANT,
-                            DamageResistant.damageResistant(fireTag)
+                            DamageResistant.damageResistant(DamageTypeTagKeys.IS_FIRE)
                     );
 
                     customPumpkin.editMeta(meta -> {

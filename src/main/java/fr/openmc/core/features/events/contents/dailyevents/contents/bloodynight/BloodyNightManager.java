@@ -72,8 +72,8 @@ public class BloodyNightManager extends Feature implements HasListeners {
         // * Gamerules personalisée
         lastTime = world.getTime();
         world.setTime(21000);
-        world.setGameRule(GameRules.ADVANCE_TIME, false);
-        world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        world.setGameRule(GameRule.NATURAL_REGENERATION, false);
     }
 
     public static void stop(BloodyNightEvent event) {
@@ -101,8 +101,8 @@ public class BloodyNightManager extends Feature implements HasListeners {
 
         // * Gamerules personalisée
         world.setTime(lastTime);
-        world.setGameRule(GameRules.ADVANCE_TIME, true);
-        world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, true);
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+        world.setGameRule(GameRule.NATURAL_REGENERATION, true);
     }
 
     /**

@@ -11,10 +11,9 @@ import fr.openmc.core.utils.nms.PlayerRespawnNMS;
 import fr.openmc.core.utils.nms.PlayerSetTimeNMS;
 import fr.openmc.core.utils.nms.PlayerWeatherNMS;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -131,8 +130,8 @@ public abstract class CustomAmbient {
      * @param initialBiomeKey clé du biome initial a changer
      * @return identifiant de la variante du biome (namespace:initialBiomePath_ambientId)
      */
-    public Identifier toBiomeVariantKey(Identifier initialBiomeKey) {
-        return Identifier.fromNamespaceAndPath(CustomAmbientRegistry.NAMESPACE, initialBiomeKey.getPath() + "_" + this.getId());
+    public ResourceLocation toBiomeVariantKey(ResourceLocation initialBiomeKey) {
+        return ResourceLocation.fromNamespaceAndPath(CustomAmbientRegistry.NAMESPACE, initialBiomeKey.getPath() + "_" + this.getId());
     }
 
     /**
@@ -143,7 +142,7 @@ public abstract class CustomAmbient {
      * @param ambientId l'id de l'ambience
      * @return l'injecteur du fichier json
      */
-    public BiomesInjector toBiomeVariant(Biome initialBiome, Identifier ambientId) {
+    public BiomesInjector toBiomeVariant(Biome initialBiome, ResourceLocation ambientId) {
         BiomeSpecialEffects initialEffects = initialBiome.getSpecialEffects();
         Biome.ClimateSettings climate = initialBiome.climateSettings;
 
@@ -152,19 +151,19 @@ public abstract class CustomAmbient {
         JsonObject effects = this.getAmbientBuilder().getBiomeBuilder().getEffects();
         Optional<Integer> grassColor = hasEffects(effects, "grass_color") ?
                 Optional.of(MathUtils.hexToInt(effects.get("grass_color").getAsString())) :
-                initialEffects.grassColorOverride();
+                initialEffects.getGrassColorOverride();
         Optional<Integer> foliageColor = hasEffects(effects, "foliage_color") ?
                 Optional.of(MathUtils.hexToInt(effects.get("foliage_color").getAsString())) :
-                initialEffects.foliageColorOverride();
+                initialEffects.getFoliageColorOverride();
         Integer waterColor = hasEffects(effects, "water_color") ?
                 MathUtils.hexToInt(effects.get("water_color").getAsString()) :
-                initialEffects.waterColor();
+                initialEffects.getWaterColor();
         Optional<Integer> dryFoliageColor = hasEffects(effects, "dry_foliage_color") ?
                 Optional.of(MathUtils.hexToInt(effects.get("dry_foliage_color").getAsString())) :
-                initialEffects.foliageColorOverride();
+                initialEffects.getFoliageColorOverride();
         String grassColorModifier = hasEffects(effects, "grass_color_modifier") ?
                 effects.get("grass_color_modifier").getAsString() :
-                initialEffects.grassColorModifier().getName();
+                initialEffects.getGrassColorModifier().getSerializedName();
 
         BiomeBuilder builder = new BiomeBuilder()
                 .waterColor(waterColor)
@@ -227,15 +226,12 @@ public abstract class CustomAmbient {
 
         ResourceKey<DimensionType> key = ResourceKey.create(
                 Registries.DIMENSION_TYPE,
-                Identifier.fromNamespaceAndPath(CustomAmbientRegistry.NAMESPACE, this.getId())
+                ResourceLocation.fromNamespaceAndPath(CustomAmbientRegistry.NAMESPACE, this.getId())
         );
 
-        Registry<DimensionType> dimRegistry =
-                MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
-
-        CACHED_DIMENSION_TYPE = dimRegistry.get(key).orElseThrow(() ->
-                new IllegalStateException("DimensionType " + CustomAmbientRegistry.NAMESPACE + ":"+ this.getId() +" introuvable")
-        );
+        CACHED_DIMENSION_TYPE = MinecraftServer.getServer().registryAccess()
+                .lookupOrThrow(Registries.DIMENSION_TYPE)
+                .getOrThrow(key);
         return CACHED_DIMENSION_TYPE;
     }
 }

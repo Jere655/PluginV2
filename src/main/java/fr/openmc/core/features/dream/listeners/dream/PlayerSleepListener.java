@@ -29,7 +29,7 @@ public class PlayerSleepListener implements Listener {
     @EventHandler
     public void onPlayerEnterBed(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
-        if (event.enterAction().problem() != null) return;
+        if (event.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) return;
 
         if (isPlayerSleeping.contains(player)) return;
         isPlayerSleeping.add(player);

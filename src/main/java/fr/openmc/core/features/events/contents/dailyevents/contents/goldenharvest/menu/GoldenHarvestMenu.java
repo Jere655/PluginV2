@@ -61,14 +61,14 @@ public class GoldenHarvestMenu extends Menu {
                     Component.text(GoldenHarvestManager.GOLDEN_CROP_ON_CROP_CHANCE * 100 + "%", NamedTextColor.AQUA),
                     Component.text(GoldenHarvestManager.GOLDEN_CROP_ON_OBESE_CHANCE * 100 + "%", NamedTextColor.AQUA)));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ -> new GoldenCropsInfoMenu(getOwner()).open()));
+        }).setOnClick(ignored -> new GoldenCropsInfoMenu(getOwner()).open()));
 
     inventory.put(13, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.FERMENTUM, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.dailyevents.golden_harvest.menu.info.fermentum.name"));
             itemMeta.lore(TranslationManager.translationLore(
                     "feature.dailyevents.golden_harvest.menu.info.fermentum.lore"));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 Bukkit.dispatchCommand(getOwner().getPlayer(), "itemsadder:iaguide omc_daily_events:fermentum")));
 
         inventory.put(15, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.OBESE_GOLDEN_APPLE, itemMeta -> {
@@ -76,7 +76,7 @@ public class GoldenHarvestMenu extends Menu {
             itemMeta.lore(TranslationManager.translationLore("feature.dailyevents.golden_harvest.menu.info.obese_crops.lore",
                     Component.text(GoldenHarvestManager.OBESE_CROP_CHANCE * 100 + "%", NamedTextColor.AQUA)));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ -> new ObeseCropsInfoMenu(getOwner()).open()));
+        }).setOnClick(ignored -> new ObeseCropsInfoMenu(getOwner()).open()));
 
         inventory.put(18, new ItemMenuBuilder(this, Material.ARROW, true));
 

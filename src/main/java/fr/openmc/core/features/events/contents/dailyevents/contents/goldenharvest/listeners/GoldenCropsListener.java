@@ -99,7 +99,7 @@ public class GoldenCropsListener implements Listener {
         Collection<CustomLoot> loots = applyDoubleCropsChance(player, itemLoot.run(player, block.getLocation()).loots());
         if (loots.isEmpty()) return;
 
-        player.playSound(player.getLocation(), Sound.ITEM_GOLDEN_DANDELION_USE, 1, 0.3f);
+        player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1, 0.3f);
         ParticleUtils.spawnDispersingParticles(
                 block.getLocation().add(0.5, 0.5, 0.5),
                 Particle.DRIPPING_HONEY,

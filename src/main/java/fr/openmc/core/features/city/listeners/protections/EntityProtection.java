@@ -2,7 +2,6 @@ package fr.openmc.core.features.city.listeners.protections;
 
 import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent;
 import fr.openmc.core.features.city.ProtectionsManager;
-import io.papermc.paper.event.entity.EntityCollideWithEntityEvent;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -12,6 +11,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Merchant;
 
@@ -48,9 +48,13 @@ public class EntityProtection implements Listener {
         ProtectionsManager.verify(player, event, event.getEntity().getLocation());
     }
 
-    @EventHandler
-    public void onPlayerCollideEntity(EntityCollideWithEntityEvent event) {
-        if (!(event.getEntities().getFirst() instanceof Player player)) return;
-        ProtectionsManager.verify(player, event, event.getEntities().get(1).getLocation());
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerCollideEntity(VehicleEntityCollisionEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Player player) {
+            ProtectionsManager.verify(player, event, event.getVehicle().getLocation());
+        } else if (event.getVehicle() instanceof Player player) {
+            ProtectionsManager.verify(player, event, entity.getLocation());
+        }
     }
 }

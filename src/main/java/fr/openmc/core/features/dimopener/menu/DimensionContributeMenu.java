@@ -234,7 +234,7 @@ public class DimensionContributeMenu extends Menu {
                     Component.empty(),
                     TranslationManager.translation("feature.dimopener.menu.money.click")
             ));
-        }).setOnClick(_ -> openMoneyDialog(remaining));
+        }).setOnClick(ignored -> openMoneyDialog(remaining));
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -265,7 +265,7 @@ public class DimensionContributeMenu extends Menu {
                                 TranslationManager.translation("feature.dimopener.dialog.confirm.tooltip"),
                                 150,
                                 DialogAction.customClick(
-                                        (view, _) -> {
+                                        (view, ignored) -> {
                                             Float amount = view.getFloat("amount");
                                             if (amount == null || amount <= 0) return;
 

@@ -89,7 +89,7 @@ public class ShopSellingMenu extends PaginatedMenu {
 			list.add(new ItemMenuBuilder(this, item, itemMeta -> {
 				if (itemMeta.hasLore()) itemMeta.lore().addAll(TranslationManager.translationLore("feature.shop.menu.selling.item_lore"));
 				else itemMeta.lore(TranslationManager.translationLore("feature.shop.menu.selling.item_lore"));
-			}).setOnClick(_ -> DialogInput.send(getOwner(),
+			}).setOnClick(ignored -> DialogInput.send(getOwner(),
 					TranslationManager.translation("feature.shop.menu.selling.price_input"),
 					Integer.MAX_VALUE,
 					s -> {
@@ -121,7 +121,7 @@ public class ShopSellingMenu extends PaginatedMenu {
 		map.put(49, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.HOMES_ICON_BIN_RED.getBest(), itemMeta -> {
 			itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.delete.btn.title"));
 			itemMeta.lore(TranslationManager.translationLore("feature.shop.menu.main.delete.btn.lore"));
-		}).setOnClick(_ -> new ConfirmMenu(
+		}).setOnClick(ignored -> new ConfirmMenu(
 				getOwner(),
 				() -> {
 					getOwner().closeInventory();

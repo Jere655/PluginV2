@@ -129,7 +129,7 @@ public class SendingLetter extends Menu {
         items.put(49, new ItemMenuBuilder(this, getHead(receiver)));
         items.put(45, ItemMenuTemplate.BTN_MAILBOX_HOME.apply(this));
         items.put(48, ItemMenuTemplate.BTN_MAILBOX_SEND.apply(this).setOnClick(e -> sendLetter(e.getInventory())));
-        items.put(50, ItemMenuTemplate.BTN_CLOSE.apply(this).setOnClick(_ -> getOwner().closeInventory()));
+        items.put(50, ItemMenuTemplate.BTN_CLOSE.apply(this).setOnClick(ignored -> getOwner().closeInventory()));
 
         return items;
     }

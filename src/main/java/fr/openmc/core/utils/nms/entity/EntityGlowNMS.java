@@ -4,7 +4,7 @@ import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
-import net.minecraft.world.scores.TeamColor;
+import net.minecraft.ChatFormatting;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
@@ -15,21 +15,20 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityGlowNMS implements Listener, NotLoadInUnitTest {
     private static final Scoreboard NMS_SCOREBOARD = new Scoreboard();
-    private static final Map<TeamColor, PlayerTeam> TEAM_MAP = new HashMap<>();
-    private static final Map<UUID, TeamColor> entitiesGlowing = new ConcurrentHashMap<>();
+    private static final Map<ChatFormatting, PlayerTeam> TEAM_MAP = new HashMap<>();
+    private static final Map<UUID, ChatFormatting> entitiesGlowing = new ConcurrentHashMap<>();
 
 
     public EntityGlowNMS() {
-        for (TeamColor color : TeamColor.values()) {
+        for (ChatFormatting color : ChatFormatting.values()) {
             PlayerTeam team = new PlayerTeam(NMS_SCOREBOARD, "omc_glow_" + color.getSerializedName());
 
-            team.setColor(Optional.of(color));
+            team.setColor(color);
             team.setSeeFriendlyInvisibles(false);
             team.setNameTagVisibility(PlayerTeam.Visibility.NEVER);
 
@@ -37,8 +36,8 @@ public class EntityGlowNMS implements Listener, NotLoadInUnitTest {
         }
     }
 
-    public static void setGlowingColor(Entity entity, TeamColor color) {
-        TeamColor previous = entitiesGlowing.get(entity.getUniqueId());
+    public static void setGlowingColor(Entity entity, ChatFormatting color) {
+        ChatFormatting previous = entitiesGlowing.get(entity.getUniqueId());
         if (previous != null && previous != color) {
             PlayerTeam previousTeam = TEAM_MAP.get(previous);
             sendPacket(ClientboundSetPlayerTeamPacket.createPlayerPacket(
@@ -66,7 +65,7 @@ public class EntityGlowNMS implements Listener, NotLoadInUnitTest {
 
     public static void removeGlowing(Entity entity) {
         entity.setGlowing(false);
-        TeamColor current = entitiesGlowing.remove(entity.getUniqueId());
+        ChatFormatting current = entitiesGlowing.remove(entity.getUniqueId());
 
         if (current == null) return;
 
@@ -95,14 +94,14 @@ public class EntityGlowNMS implements Listener, NotLoadInUnitTest {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player joined = event.getPlayer();
-        for (TeamColor color : TeamColor.values()) {
+        for (ChatFormatting color : ChatFormatting.values()) {
             PlayerTeam team = TEAM_MAP.get(color);
             if (team == null) continue;
 
             sendPacketTo(joined, ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
         }
 
-        for (Map.Entry<UUID, TeamColor> entry : entitiesGlowing.entrySet()) {
+        for (Map.Entry<UUID, ChatFormatting> entry : entitiesGlowing.entrySet()) {
             PlayerTeam team = TEAM_MAP.get(entry.getValue());
             if (team == null) continue;
             sendPacketTo(joined, ClientboundSetPlayerTeamPacket.createPlayerPacket(

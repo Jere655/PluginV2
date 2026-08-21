@@ -58,7 +58,7 @@ public class BloodyNightMenu extends Menu {
             itemMeta.lore(TranslationManager.translationLore(
                     "feature.dailyevents.bloody_night.menu.info.bloody_monster.lore"));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ -> new BloodyMonsterMenu(getOwner()).open()));
+        }).setOnClick(ignored -> new BloodyMonsterMenu(getOwner()).open()));
 
     inventory.put(13, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.VAMPIRE_HEAD, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.dailyevents.bloody_night.menu.info.vampire_boss.name"));
@@ -66,10 +66,10 @@ public class BloodyNightMenu extends Menu {
                     "feature.dailyevents.bloody_night.menu.info.vampire_boss.lore",
                     Component.text(BloodyNightManager.VAMPIRE_SPAWN_TIME / 60 / 20, NamedTextColor.RED)));
             itemMeta.setEnchantmentGlintOverride(isActived);
-        }).setOnClick(_ ->
+        }).setOnClick(ignored ->
                 OMCRegistry.CUSTOM_LOOT_TABLES.VAMPIRE.openMenu(getOwner())));
 
-        inventory.put(15, new ItemMenuBuilder(this, Material.NETHERITE_SPEAR, itemMeta -> {
+        inventory.put(15, new ItemMenuBuilder(this, Material.NETHERITE_SWORD, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.dailyevents.bloody_night.menu.info.bloody_raid.name"));
             itemMeta.lore(TranslationManager.translationLore("feature.dailyevents.bloody_night.menu.info.bloody_raid.lore",
                     Component.text(BloodyNightManager.RAID_INTERVAL / 60 / 20, NamedTextColor.RED)));

@@ -6,7 +6,7 @@ import fr.openmc.core.utils.bukkit.EntityUtils;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import fr.openmc.core.utils.nms.entity.EntityGlowNMS;
 import fr.openmc.core.utils.text.messages.TranslationManager;
-import net.minecraft.world.scores.TeamColor;
+import net.minecraft.ChatFormatting;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
@@ -68,7 +68,7 @@ public class CorruptedMonster extends CustomMob<Monster> {
         ParticleUtils.spawnDispersingParticles(entity.getLocation(),
                 Particle.TRIAL_SPAWNER_DETECTION,
                 10, 35, 0.1D, null);
-        EntityGlowNMS.setGlowingColor(entity, TeamColor.DARK_RED);
+        EntityGlowNMS.setGlowingColor(entity, ChatFormatting.DARK_RED);
     }
 
     public void resetToDefault(Monster entity) {

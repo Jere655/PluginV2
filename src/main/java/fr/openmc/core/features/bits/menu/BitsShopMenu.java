@@ -70,7 +70,7 @@ public class BitsShopMenu extends Menu {
             itemMeta.displayName(itemName);
             itemMeta.lore(TranslationManager.translationLore("feature.bits.menu.shop.buy.lore",
                     itemName, Component.text(price).color(NamedTextColor.AQUA)));
-        }).setOnClick(_ -> {
+        }).setOnClick(ignored -> {
             if (bits < price) {
                 MessagesManager.sendMessage(getOwner(), TranslationManager.translation("feature.bits.menu.shop.not_enough_bits"),
                         Prefix.OPENMC, MessageType.ERROR, true);

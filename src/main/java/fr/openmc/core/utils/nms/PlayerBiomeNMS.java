@@ -230,7 +230,7 @@ public class PlayerBiomeNMS {
 
         return BIOME_CACHE.computeIfAbsent(cacheKey, k -> {
             ResourceLocation mappedId = identifierModifier.apply(originalId);
-            return registry.wrapAsHolder(registry.getOrThrow(ResourceKey.create(Registries.BIOME, mappedId)));
+            return registry.getOrThrow(ResourceKey.create(Registries.BIOME, mappedId));
         });
     }
 }

@@ -63,7 +63,7 @@ public class BitsMenu extends Menu {
         inventory.put(14, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.HOMES_ICON_SHOP, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.bits.menu.main.shop"));
             itemMeta.lore(TranslationManager.translationLore("feature.bits.menu.main.shop.lore"));
-        }).setOnClick(ignored -> new BitsShopMenu(getOwner()).open());
+        }).setOnClick(ignored -> new BitsShopMenu(getOwner()).open()));
 
         inventory.put(18, new ItemMenuBuilder(this, Material.ARROW, true));
 

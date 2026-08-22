@@ -30,6 +30,7 @@ public class ListenersManager {
                 () -> new AsyncChatListener(OMCPlugin.getInstance()),
                 NoMoreRabbit::new,
                 ArmorListener::new,
+                BlockedEnchantListener::new,
                 () -> new EntityGlowNMS(),
                 () -> new RegionTrackingListener(),
                 () -> new SpawnerExtractorListener(),

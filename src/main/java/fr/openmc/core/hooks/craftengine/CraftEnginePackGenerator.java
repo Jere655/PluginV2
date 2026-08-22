@@ -37,13 +37,6 @@ public final class CraftEnginePackGenerator {
     private CraftEnginePackGenerator() {
     }
 
-    /**
-     * Convertit les contenus ItemsAdder d'OpenMC en pack CraftEngine.
-     *
-     * @param pluginsDir le dossier plugins du serveur
-     * @param reportFile le fichier de rapport de migration à écrire
-     * @return le rapport de conversion, ou null si les contenus sont introuvables
-     */
     public static ConversionReport generate(File pluginsDir, File reportFile) {
         File contentsDir = new File(pluginsDir, CONTENTS_PATH);
 
@@ -93,6 +86,8 @@ public final class CraftEnginePackGenerator {
     private static void convertNamespace(File namespaceDir, File packDir, ConversionReport report) throws IOException {
         String namespace = namespaceDir.getName();
         ItemsAdderContentConverter converter = new ItemsAdderContentConverter(namespace, namespaceDir, report);
+        ItemsAdderModernContentConverter modernConverter =
+                new ItemsAdderModernContentConverter(namespace, namespaceDir, report);
 
         List<File> configs = new ArrayList<>();
         collectFiles(namespaceDir, ".yml", configs);
@@ -104,22 +99,24 @@ public final class CraftEnginePackGenerator {
 
             String relative = namespaceDir.toPath().relativize(config.toPath()).toString();
             try {
-                converter.read(relative, content);
+                converter.read(relative, modernConverter.legacyCompatibleContent(content));
+                modernConverter.read(relative, content, converter.getItems());
             } catch (Exception e) {
                 report.unsupported(namespace + "/" + relative, "erreur de conversion : " + e);
             }
         }
 
         copyAssets(namespaceDir, namespace, packDir);
-        writeConfiguration(packDir, namespace, converter);
+        writeConfiguration(packDir, namespace, converter, modernConverter);
     }
 
-    private static void writeConfiguration(File packDir, String namespace, ItemsAdderContentConverter converter)
-            throws IOException {
+    private static void writeConfiguration(File packDir, String namespace, ItemsAdderContentConverter converter,
+                                           ItemsAdderModernContentConverter modernConverter) throws IOException {
         Map<String, Object> configuration = new LinkedHashMap<>();
 
         if (!converter.getItems().isEmpty()) configuration.put("items", converter.getItems());
         if (!converter.getBlocks().isEmpty()) configuration.put("blocks", converter.getBlocks());
+        if (!modernConverter.getEquipments().isEmpty()) configuration.put("equipments", modernConverter.getEquipments());
         if (!converter.getImages().isEmpty()) configuration.put("images", converter.getImages());
         if (!converter.getRecipes().isEmpty()) configuration.put("recipes", converter.getRecipes());
 
@@ -135,9 +132,6 @@ public final class CraftEnginePackGenerator {
         }
     }
 
-    /**
-     * Copie les textures, modèles et sons du namespace vers le resourcepack du pack CraftEngine.
-     */
     private static void copyAssets(File namespaceDir, String namespace, File packDir) throws IOException {
         Path assetsDir = packDir.toPath().resolve("resourcepack/assets");
 

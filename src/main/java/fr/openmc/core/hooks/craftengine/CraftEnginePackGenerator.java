@@ -92,6 +92,8 @@ public final class CraftEnginePackGenerator {
                 new ItemsAdderLegacyPropertyConverter(namespace, namespaceDir, report);
         ItemsAdderIaaRecipeConverter iaaRecipeConverter =
                 new ItemsAdderIaaRecipeConverter(namespace, report);
+        ItemsAdderCategoryConverter categoryConverter =
+                new ItemsAdderCategoryConverter(namespace, report);
 
         List<File> configs = new ArrayList<>();
         collectFiles(namespaceDir, ".yml", configs);
@@ -105,28 +107,32 @@ public final class CraftEnginePackGenerator {
             try {
                 Map<String, Object> legacyCompatible = legacyPropertyConverter.legacyCompatibleContent(content);
                 Map<String, Object> modernCompatible = modernConverter.legacyCompatibleContent(legacyCompatible);
-                converter.read(relative, iaaRecipeConverter.legacyCompatibleContent(modernCompatible));
+                Map<String, Object> iaaCompatible = iaaRecipeConverter.legacyCompatibleContent(modernCompatible);
+                converter.read(relative, categoryConverter.legacyCompatibleContent(iaaCompatible));
                 modernConverter.read(relative, content, converter.getItems());
                 legacyPropertyConverter.read(relative, content, converter.getItems());
                 iaaRecipeConverter.read(relative, content);
+                categoryConverter.read(relative, content);
             } catch (Exception e) {
                 report.unsupported(namespace + "/" + relative, "erreur de conversion : " + e);
             }
         }
 
         copyAssets(namespaceDir, namespace, packDir);
-        writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter);
+        writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter, categoryConverter);
     }
 
     private static void writeConfiguration(File packDir, String namespace, ItemsAdderContentConverter converter,
                                            ItemsAdderModernContentConverter modernConverter,
-                                           ItemsAdderIaaRecipeConverter iaaRecipeConverter) throws IOException {
+                                           ItemsAdderIaaRecipeConverter iaaRecipeConverter,
+                                           ItemsAdderCategoryConverter categoryConverter) throws IOException {
         Map<String, Object> configuration = new LinkedHashMap<>();
 
         if (!converter.getItems().isEmpty()) configuration.put("items", converter.getItems());
         if (!converter.getBlocks().isEmpty()) configuration.put("blocks", converter.getBlocks());
         if (!modernConverter.getEquipments().isEmpty()) configuration.put("equipments", modernConverter.getEquipments());
         if (!converter.getImages().isEmpty()) configuration.put("images", converter.getImages());
+        if (!categoryConverter.getCategories().isEmpty()) configuration.put("categories", categoryConverter.getCategories());
 
         Map<String, Object> allRecipes = new LinkedHashMap<>(converter.getRecipes());
         allRecipes.putAll(modernConverter.getRecipes());

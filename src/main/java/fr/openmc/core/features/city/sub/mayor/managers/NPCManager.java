@@ -4,6 +4,7 @@ import de.oliver.fancynpcs.api.FancyNpcsPlugin;
 import de.oliver.fancynpcs.api.Npc;
 import de.oliver.fancynpcs.api.NpcData;
 import de.oliver.fancynpcs.api.events.NpcInteractEvent;
+import de.oliver.fancynpcs.api.skins.SkinData;
 import de.oliver.fancynpcs.api.utils.NpcEquipmentSlot;
 import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.OMCPlugin;
@@ -78,8 +79,10 @@ public class NPCManager implements Listener {
 
         NpcData dataMayor = new NpcData("mayor-" + cityUUID, creatorUUID, locationMayor);
         if (city.getMayor().getMayorUUID() != null && city.getElectionType() == ElectionType.ELECTION) {
-            String mayorName = CacheOfflinePlayer.getOfflinePlayer(city.getMayor().getMayorUUID()).getName();
-            dataMayor.setSkin(mayorName);
+            UUID mayorUUID = city.getMayor().getMayorUUID();
+            String mayorName = CacheOfflinePlayer.getOfflinePlayer(mayorUUID).getName();
+            // on resout le skin par UUID: la resolution par pseudo fait un appel HTTP bloquant sur le main thread
+            dataMayor.setSkinData(FancyNpcsPlugin.get().getSkinManager().getByUUID(mayorUUID, SkinData.SkinVariant.AUTO));
             String mayorDisplayName = "<gold>" + LegacyComponentSerializer.legacySection()
                     .serialize(TranslationManager.translation("feature.city.mayor.npc.display.mayor", Component.text(mayorName))) + "</gold>";
             dataMayor.setDisplayName(mayorDisplayName);
@@ -98,8 +101,10 @@ public class NPCManager implements Listener {
         Npc npcMayor = FancyNpcsPlugin.get().getNpcAdapter().apply(dataMayor);
 
         NpcData dataOwner = new NpcData("owner-" + cityUUID, creatorUUID, locationOwner);
-        String ownerName = CacheOfflinePlayer.getOfflinePlayer(city.getPlayerWithPermission(CityPermission.OWNER)).getName();
-        dataOwner.setSkin(ownerName);
+        UUID ownerUUID = city.getPlayerWithPermission(CityPermission.OWNER);
+        String ownerName = CacheOfflinePlayer.getOfflinePlayer(ownerUUID).getName();
+        // on resout le skin par UUID: la resolution par pseudo fait un appel HTTP bloquant sur le main thread
+        dataOwner.setSkinData(FancyNpcsPlugin.get().getSkinManager().getByUUID(ownerUUID, SkinData.SkinVariant.AUTO));
         String ownerDisplayName = LegacyComponentSerializer.legacySection()
                 .serialize(TranslationManager.translation("feature.city.mayor.npc.display.owner", Component.text(ownerName)));
         dataOwner.setDisplayName("<yellow>" + ownerDisplayName + "</yellow>");

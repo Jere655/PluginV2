@@ -4,10 +4,9 @@ import de.oliver.fancynpcs.api.FancyNpcsPlugin;
 import de.oliver.fancynpcs.api.Npc;
 import de.oliver.fancynpcs.api.NpcData;
 import de.oliver.fancynpcs.api.NpcManager;
-import de.oliver.fancynpcs.api.skins.SkinLoadException;
+import de.oliver.fancynpcs.api.skins.SkinData;
 import de.oliver.fancynpcs.api.utils.NpcEquipmentSlot;
 import fr.openmc.core.OMCPlugin;
-import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.hooks.FancyNpcsHook;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -77,11 +76,8 @@ public class PlayerCloneNpc {
         data.setDisplayName("<empty>");
 
         // * Player clone specific attributes
-        try {
-            data.setSkin(player.getName());
-        } catch (SkinLoadException e) {
-            OMCLogger.error("Erreur de chargement du skin pour le joueur {}", player.getName());
-        }
+        // on resout le skin par UUID: la resolution par pseudo fait un appel HTTP bloquant sur le main thread
+        data.setSkinData(FancyNpcsPlugin.get().getSkinManager().getByUUID(player.getUniqueId(), SkinData.SkinVariant.AUTO));
         data.addAttribute(FancyNpcsPlugin.get().getAttributeManager().getAttributeByName(EntityType.PLAYER, "pose"), pose.name().toLowerCase());
 
         // * Set equipement

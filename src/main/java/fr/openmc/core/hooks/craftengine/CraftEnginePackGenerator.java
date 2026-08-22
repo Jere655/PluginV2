@@ -88,6 +88,8 @@ public final class CraftEnginePackGenerator {
         ItemsAdderContentConverter converter = new ItemsAdderContentConverter(namespace, namespaceDir, report);
         ItemsAdderModernContentConverter modernConverter =
                 new ItemsAdderModernContentConverter(namespace, namespaceDir, report);
+        ItemsAdderLegacyPropertyConverter legacyPropertyConverter =
+                new ItemsAdderLegacyPropertyConverter(namespace, namespaceDir, report);
 
         List<File> configs = new ArrayList<>();
         collectFiles(namespaceDir, ".yml", configs);
@@ -99,8 +101,10 @@ public final class CraftEnginePackGenerator {
 
             String relative = namespaceDir.toPath().relativize(config.toPath()).toString();
             try {
-                converter.read(relative, modernConverter.legacyCompatibleContent(content));
+                Map<String, Object> legacyCompatible = legacyPropertyConverter.legacyCompatibleContent(content);
+                converter.read(relative, modernConverter.legacyCompatibleContent(legacyCompatible));
                 modernConverter.read(relative, content, converter.getItems());
+                legacyPropertyConverter.read(relative, content, converter.getItems());
             } catch (Exception e) {
                 report.unsupported(namespace + "/" + relative, "erreur de conversion : " + e);
             }

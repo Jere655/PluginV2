@@ -270,28 +270,48 @@ public class DreamManager extends Feature implements HasDatabase, LoadAfterItems
         ItemStack[] oldInventory = dreamPlayer.getOldInventory();
         PlayerInventory dreamInventory = player.getInventory();
 
-        DBDreamPlayer cacheDreamPlayer = getCacheDreamPlayer(player);
         String serializedDreamInventory = BukkitSerializer.playerInventoryToBase64(dreamInventory);
-        if (cacheDreamPlayer != null) {
-            cacheDreamPlayer.setDreamInventory(serializedDreamInventory);
-            cacheDreamPlayer.setDreamX(dreamLocation.getX());
-            cacheDreamPlayer.setDreamY(dreamLocation.getY());
-            cacheDreamPlayer.setDreamZ(dreamLocation.getZ());
-        } else {
-            addCacheDreamPlayer(player, new DBDreamPlayer(
-                    player.getUniqueId(),
-                    dreamPlayer.getMaxDreamTime(),
-                    serializedDreamInventory,
-                    dreamLocation.getX(),
-                    dreamLocation.getY(),
-                    dreamLocation.getZ(),
-                    0
-            ));
-        }
+        DBDreamPlayer dbDreamPlayer = updateOrCreateDreamPlayerData(
+                player.getUniqueId(),
+                getCacheDreamPlayer(player),
+                dreamPlayer.getMaxDreamTime(),
+                serializedDreamInventory,
+                dreamLocation.getX(),
+                dreamLocation.getY(),
+                dreamLocation.getZ()
+        );
+        addCacheDreamPlayer(player, dbDreamPlayer);
 
         player.getInventory().setContents(oldInventory);
         player.updateInventory();
-        saveDreamPlayerData(cacheDreamPlayer);
+        saveDreamPlayerData(dbDreamPlayer);
+    }
+
+    /**
+     * Met a jour les donnees de reve en cache, ou en cree de nouvelles si le joueur n'en a pas encore.
+     *
+     * @param playerUUID UUID du joueur
+     * @param cachedDreamPlayer Donnees en cache, ou null si le joueur n'en a pas
+     * @param maxDreamTime Temps de reve maximum du joueur
+     * @param serializedDreamInventory Inventaire de reve serialise
+     * @param dreamX Position X quittee dans le reve
+     * @param dreamY Position Y quittee dans le reve
+     * @param dreamZ Position Z quittee dans le reve
+     * @return Les donnees de reve a sauvegarder, jamais null
+     */
+    static DBDreamPlayer updateOrCreateDreamPlayerData(UUID playerUUID, DBDreamPlayer cachedDreamPlayer,
+                                                       long maxDreamTime, String serializedDreamInventory,
+                                                       double dreamX, double dreamY, double dreamZ) {
+        if (cachedDreamPlayer == null) {
+            return new DBDreamPlayer(playerUUID, maxDreamTime, serializedDreamInventory, dreamX, dreamY, dreamZ, 0);
+        }
+
+        cachedDreamPlayer.setDreamInventory(serializedDreamInventory);
+        cachedDreamPlayer.setDreamX(dreamX);
+        cachedDreamPlayer.setDreamY(dreamY);
+        cachedDreamPlayer.setDreamZ(dreamZ);
+
+        return cachedDreamPlayer;
     }
 
     public static void preloadSavePlayer(Player player, Location dreamLocation) throws IOException {

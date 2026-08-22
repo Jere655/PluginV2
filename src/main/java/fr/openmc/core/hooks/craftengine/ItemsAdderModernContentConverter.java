@@ -9,13 +9,15 @@ import java.util.Map;
 
 /**
  * Convertit les propriétés ItemsAdder modernes qui n'étaient pas prises en charge
- * par le convertisseur historique : équipements, consommables, attributs et enchantements.
+ * par le convertisseur historique : équipements, consommables, attributs,
+ * enchantements et recettes de cuisson.
  */
 public final class ItemsAdderModernContentConverter {
     private final String namespace;
     private final File namespaceDir;
     private final ConversionReport report;
     private final Map<String, Object> equipments = new LinkedHashMap<>();
+    private final Map<String, Object> recipes = new LinkedHashMap<>();
 
     public ItemsAdderModernContentConverter(String namespace, File namespaceDir, ConversionReport report) {
         this.namespace = namespace;
@@ -25,6 +27,10 @@ public final class ItemsAdderModernContentConverter {
 
     public Map<String, Object> getEquipments() {
         return equipments;
+    }
+
+    public Map<String, Object> getRecipes() {
+        return recipes;
     }
 
     /**
@@ -49,12 +55,21 @@ public final class ItemsAdderModernContentConverter {
             sanitized.put("items", sanitizedItems);
         }
 
+        Map<String, Object> sourceRecipes = asSection(content.get("recipes"));
+        if (!sourceRecipes.isEmpty()) {
+            Map<String, Object> legacyRecipes = new LinkedHashMap<>(sourceRecipes);
+            legacyRecipes.remove("cooking");
+            legacyRecipes.remove("campfire_cooking");
+            sanitized.put("recipes", legacyRecipes);
+        }
+
         return sanitized;
     }
 
     public void read(String fileName, Map<String, Object> content, Map<String, Object> convertedItems) {
         readEquipments(fileName, asSection(content.get("equipments")));
         readItemProperties(asSection(content.get("items")), convertedItems);
+        readRecipes(fileName, asSection(content.get("recipes")));
     }
 
     private void readEquipments(String fileName, Map<String, Object> section) {
@@ -112,13 +127,14 @@ public final class ItemsAdderModernContentConverter {
                 applyConsumable(fullId, consumable, item);
             }
 
-            Map<String, Object> attributes = asSection(definition.get("attribute_modifiers"));
-            if (!attributes.isEmpty()) {
-                applyAttributeModifiers(fullId, attributes, item);
+            Object attributes = definition.get("attribute_modifiers");
+            if (attributes instanceof Map<?, ?>) {
+                applyAttributeModifiers(fullId, asSection(attributes), item);
             }
 
-            if (definition.containsKey("enchants")) {
-                applyEnchantments(fullId, definition.get("enchants"), item);
+            Object enchants = definition.get("enchants");
+            if (enchants instanceof List<?> list && !list.isEmpty()) {
+                applyEnchantments(fullId, list, item);
             }
 
             convertedItems.put(fullId, item);
@@ -173,123 +189,159 @@ public final class ItemsAdderModernContentConverter {
         report.getConsumableIDs().add(fullId);
     }
 
-    /**
-     * ItemsAdder stocke les attributs sous forme slot -> nom -> valeur, par exemple
-     * mainhand.attackDamage=4. CraftEngine accepte une liste de modifiers avec type,
-     * slot, id déterministe et amount.
-     */
     private void applyAttributeModifiers(String fullId, Map<String, Object> source, Map<String, Object> item) {
         List<Map<String, Object>> converted = new ArrayList<>();
-
         for (Map.Entry<String, Object> slotEntry : source.entrySet()) {
-            String slot = normalizeSlot(slotEntry.getKey());
+            String slot = normalizeAttributeSlot(slotEntry.getKey());
             if (slot == null) {
-                report.unsupported(fullId, "slot d'attribut ItemsAdder inconnu : " + slotEntry.getKey());
+                report.unsupported(fullId, "slot attribute_modifiers inconnu : " + slotEntry.getKey());
+                continue;
+            }
+            Map<String, Object> modifiers = asSection(slotEntry.getValue());
+            for (Map.Entry<String, Object> modifier : modifiers.entrySet()) {
+                if (!(modifier.getValue() instanceof Number amount)) {
+                    report.unsupported(fullId, "valeur attribute_modifiers non numérique : " + modifier.getKey());
+                    continue;
+                }
+                String type = normalizeAttributeType(modifier.getKey());
+                if (type == null) {
+                    report.unsupported(fullId, "attribute_modifiers inconnu : " + modifier.getKey());
+                    continue;
+                }
+                Map<String, Object> target = new LinkedHashMap<>();
+                target.put("type", type);
+                target.put("slot", slot);
+                target.put("id", namespace + ":" + sanitizeId(fullId.substring(fullId.indexOf(':') + 1) + "_" + modifier.getKey()));
+                target.put("amount", amount.doubleValue());
+                target.put("operation", "add_value");
+                converted.add(target);
+            }
+        }
+        if (!converted.isEmpty()) {
+            Map<String, Object> data = mutableSection(item.get("data"));
+            data.put("attribute_modifiers", converted);
+            item.put("data", data);
+        }
+    }
+
+    private void applyEnchantments(String fullId, List<?> source, Map<String, Object> item) {
+        Map<String, Object> enchantments = new LinkedHashMap<>();
+        for (Object raw : source) {
+            if (!(raw instanceof String value) || value.isBlank()) continue;
+            int split = value.lastIndexOf(':');
+            if (split <= 0 || split == value.length() - 1) {
+                report.unsupported(fullId, "enchant invalide : " + value);
+                continue;
+            }
+            String enchantment = value.substring(0, split).toLowerCase(Locale.ROOT);
+            try {
+                int level = Integer.parseInt(value.substring(split + 1));
+                enchantments.put(enchantment, level);
+            } catch (NumberFormatException e) {
+                report.unsupported(fullId, "niveau d'enchant invalide : " + value);
+            }
+        }
+        if (!enchantments.isEmpty()) {
+            Map<String, Object> data = mutableSection(item.get("data"));
+            data.put("enchantments", Map.of("merge", true, "enchantments", enchantments));
+            item.put("data", data);
+        }
+    }
+
+    private void readRecipes(String fileName, Map<String, Object> section) {
+        readCookingRecipes(fileName, asSection(section.get("cooking")));
+        readCampfireRecipes(fileName, asSection(section.get("campfire_cooking")));
+    }
+
+    private void readCookingRecipes(String fileName, Map<String, Object> section) {
+        for (Map.Entry<String, Object> entry : section.entrySet()) {
+            String baseId = qualifyId(entry.getKey());
+            Map<String, Object> definition = asSection(entry.getValue());
+            String ingredient = cookingIngredient(definition);
+            Map<String, Object> result = cookingResult(definition);
+            if (ingredient == null || result == null) {
+                report.unsupported(baseId, "recette cooking incomplète dans " + fileName);
                 continue;
             }
 
-            Map<String, Object> modifiers = asSection(slotEntry.getValue());
-            for (Map.Entry<String, Object> modifierEntry : modifiers.entrySet()) {
-                if (!(modifierEntry.getValue() instanceof Number amount)) {
-                    report.unsupported(fullId, "valeur d'attribut non numérique : " + modifierEntry.getKey());
-                    continue;
+            List<String> machines = stringList(definition.get("machines"));
+            if (machines.isEmpty()) machines = List.of("FURNACE");
+
+            for (String machine : machines) {
+                String type;
+                String suffix;
+                int defaultTime;
+                switch (machine.toUpperCase(Locale.ROOT)) {
+                    case "FURNACE" -> { type = "smelting"; suffix = "furnace"; defaultTime = 200; }
+                    case "SMOKER" -> { type = "smoking"; suffix = "smoker"; defaultTime = 100; }
+                    case "BLAST_FURNACE", "BLASTING" -> { type = "blasting"; suffix = "blasting"; defaultTime = 100; }
+                    default -> {
+                        report.unsupported(baseId, "machine de cuisson ItemsAdder non convertie : " + machine);
+                        continue;
+                    }
                 }
 
-                String attribute = normalizeAttribute(modifierEntry.getKey());
-                Map<String, Object> modifier = new LinkedHashMap<>();
-                modifier.put("type", attribute);
-                modifier.put("slot", slot);
-                modifier.put("id", modifierId(fullId, slot, attribute));
-                modifier.put("amount", amount.doubleValue());
-                converted.add(modifier);
+                String id = baseId + "_" + suffix;
+                Map<String, Object> recipe = cookingRecipe(type, ingredient, result, definition, defaultTime);
+                recipes.put(id, recipe);
+                report.getRecipeIDs().add(id);
             }
         }
-
-        if (converted.isEmpty()) return;
-
-        Map<String, Object> data = mutableSection(item.get("data"));
-        data.put("attribute_modifiers", converted);
-        item.put("data", data);
     }
 
-    /**
-     * Convertit les formes ItemsAdder les plus courantes :
-     * - liste : [minecraft:sharpness:10]
-     * - map : {minecraft:sharpness: 10}
-     */
-    private void applyEnchantments(String fullId, Object source, Map<String, Object> item) {
-        Map<String, Object> enchantments = new LinkedHashMap<>();
-
-        if (source instanceof List<?> list) {
-            for (Object raw : list) {
-                parseEnchantment(fullId, String.valueOf(raw), enchantments);
+    private void readCampfireRecipes(String fileName, Map<String, Object> section) {
+        for (Map.Entry<String, Object> entry : section.entrySet()) {
+            String baseId = qualifyId(entry.getKey());
+            Map<String, Object> definition = asSection(entry.getValue());
+            String ingredient = cookingIngredient(definition);
+            Map<String, Object> result = cookingResult(definition);
+            if (ingredient == null || result == null) {
+                report.unsupported(baseId, "recette campfire_cooking incomplète dans " + fileName);
+                continue;
             }
-        } else if (source instanceof Map<?, ?> map) {
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                if (entry.getValue() instanceof Number level) {
-                    enchantments.put(normalizeEnchantmentId(String.valueOf(entry.getKey())), level.intValue());
-                } else {
-                    report.unsupported(fullId, "niveau d'enchantement non numérique : " + entry.getKey());
-                }
-            }
-        } else if (source != null) {
-            parseEnchantment(fullId, String.valueOf(source), enchantments);
-        }
 
-        if (enchantments.isEmpty()) return;
-
-        Map<String, Object> data = mutableSection(item.get("data"));
-        data.put("enchantments", enchantments);
-        item.put("data", data);
-    }
-
-    private void parseEnchantment(String fullId, String raw, Map<String, Object> enchantments) {
-        int separator = raw.lastIndexOf(':');
-        if (separator <= 0 || separator == raw.length() - 1) {
-            report.unsupported(fullId, "format d'enchantement ItemsAdder non reconnu : " + raw);
-            return;
-        }
-
-        String id = raw.substring(0, separator);
-        String levelText = raw.substring(separator + 1);
-        try {
-            int level = Integer.parseInt(levelText);
-            enchantments.put(normalizeEnchantmentId(id), level);
-        } catch (NumberFormatException exception) {
-            report.unsupported(fullId, "niveau d'enchantement invalide : " + raw);
+            String id = baseId + "_campfire";
+            recipes.put(id, cookingRecipe("campfire_cooking", ingredient, result, definition, 600));
+            report.getRecipeIDs().add(id);
         }
     }
 
-    private String normalizeAttribute(String attribute) {
-        if (attribute.contains(":")) return attribute.toLowerCase(Locale.ROOT);
+    private Map<String, Object> cookingRecipe(String type, String ingredient, Map<String, Object> result,
+                                              Map<String, Object> definition, int defaultTime) {
+        Map<String, Object> recipe = new LinkedHashMap<>();
+        recipe.put("type", type);
+        recipe.put("ingredients", List.of(ingredient));
+        recipe.put("result", result);
+        recipe.put("time", definition.get("cook_time") instanceof Number n ? n.intValue() : defaultTime);
+        recipe.put("exp", definition.get("exp") instanceof Number n ? n.doubleValue() : 0.0);
+        return recipe;
+    }
 
-        StringBuilder normalized = new StringBuilder("minecraft:");
-        for (int i = 0; i < attribute.length(); i++) {
-            char current = attribute.charAt(i);
-            if (Character.isUpperCase(current)) {
-                normalized.append('_').append(Character.toLowerCase(current));
-            } else {
-                normalized.append(Character.toLowerCase(current));
-            }
+    private String cookingIngredient(Map<String, Object> definition) {
+        Object raw = definition.get("ingredient");
+        if (raw instanceof String value) return toItemId(value);
+        Map<String, Object> ingredient = asSection(raw);
+        Object item = ingredient.get("item");
+        if (!(item instanceof String value) || value.isBlank()) return null;
+        if (ingredient.get("amount") instanceof Number n && n.intValue() != 1) {
+            report.unsupported(qualifyId("recipe_ingredient"), "quantité de cuisson > 1 ignorée : " + n.intValue());
         }
-        return normalized.toString();
+        return toItemId(value);
     }
 
-    private String normalizeEnchantmentId(String id) {
-        String normalized = id.toLowerCase(Locale.ROOT);
-        return normalized.contains(":") ? normalized : "minecraft:" + normalized;
+    private Map<String, Object> cookingResult(Map<String, Object> definition) {
+        Map<String, Object> source = asSection(definition.get("result"));
+        Object item = source.get("item");
+        if (!(item instanceof String value) || value.isBlank()) return null;
+        int count = source.get("amount") instanceof Number n ? n.intValue() : 1;
+        return Map.of("id", toItemId(value), "count", count);
     }
 
-    private String modifierId(String fullId, String slot, String attribute) {
-        int separator = fullId.indexOf(':');
-        String itemNamespace = separator >= 0 ? fullId.substring(0, separator) : namespace;
-        String itemPath = separator >= 0 ? fullId.substring(separator + 1) : fullId;
-        String attributePath = attribute.contains(":") ? attribute.substring(attribute.indexOf(':') + 1) : attribute;
-        return itemNamespace + ":" + sanitizePath(itemPath + "_" + slot + "_" + attributePath);
-    }
-
-    private String sanitizePath(String value) {
-        return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_./-]", "_");
+    private List<String> stringList(Object value) {
+        if (!(value instanceof List<?> list)) return List.of();
+        List<String> result = new ArrayList<>();
+        for (Object element : list) result.add(String.valueOf(element));
+        return result;
     }
 
     private String inferSlot(Map<String, Object> definition, Map<String, Object> equipment) {
@@ -313,7 +365,22 @@ public final class ItemsAdderModernContentConverter {
 
     private String normalizeSlot(String slot) {
         return switch (slot.toLowerCase(Locale.ROOT)) {
-            case "any" -> "any";
+            case "head", "helmet" -> "head";
+            case "chest", "chestplate" -> "chest";
+            case "legs", "leggings" -> "legs";
+            case "feet", "boots" -> "feet";
+            case "body" -> "body";
+            case "saddle" -> "saddle";
+            case "mainhand", "main_hand" -> "mainhand";
+            case "offhand", "off_hand" -> "offhand";
+            default -> null;
+        };
+    }
+
+    private String normalizeAttributeSlot(String slot) {
+        return switch (slot.toLowerCase(Locale.ROOT)) {
+            case "mainhand", "main_hand" -> "mainhand";
+            case "offhand", "off_hand" -> "offhand";
             case "hand" -> "hand";
             case "head", "helmet" -> "head";
             case "chest", "chestplate" -> "chest";
@@ -322,10 +389,39 @@ public final class ItemsAdderModernContentConverter {
             case "armor" -> "armor";
             case "body" -> "body";
             case "saddle" -> "saddle";
-            case "mainhand", "main_hand" -> "mainhand";
-            case "offhand", "off_hand" -> "offhand";
+            case "any" -> "any";
             default -> null;
         };
+    }
+
+    private String normalizeAttributeType(String type) {
+        return switch (type.toLowerCase(Locale.ROOT).replace("_", "")) {
+            case "attackdamage" -> "minecraft:attack_damage";
+            case "attackspeed" -> "minecraft:attack_speed";
+            case "attackknockback" -> "minecraft:attack_knockback";
+            case "armor" -> "minecraft:armor";
+            case "armortoughness" -> "minecraft:armor_toughness";
+            case "knockbackresistance" -> "minecraft:knockback_resistance";
+            case "luck" -> "minecraft:luck";
+            case "maxhealth" -> "minecraft:max_health";
+            case "movementspeed" -> "minecraft:movement_speed";
+            case "flyingspeed" -> "minecraft:flying_speed";
+            case "followrange" -> "minecraft:follow_range";
+            case "jumpstrength" -> "minecraft:jump_strength";
+            case "scale" -> "minecraft:scale";
+            case "stepheight" -> "minecraft:step_height";
+            default -> null;
+        };
+    }
+
+    private String sanitizeId(String value) {
+        return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_./-]", "_");
+    }
+
+    private String toItemId(String value) {
+        String id = value.trim();
+        if (id.contains(":")) return id.toLowerCase(Locale.ROOT);
+        return "minecraft:" + id.toLowerCase(Locale.ROOT);
     }
 
     private void reportMissingTexture(String fullId, String path) {

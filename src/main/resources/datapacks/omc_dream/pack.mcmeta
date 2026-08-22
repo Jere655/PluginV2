@@ -1,8 +1,10 @@
 {
   "pack": {
     "description": "Le Pack de données des Rêves d'OpenMC",
-    "pack_format": 107.1,
-    "min_format": 107.1,
-    "max_format": 107.1
+    "pack_format": 81,
+    "supported_formats": {
+      "min_inclusive": 81,
+      "max_inclusive": 81
+    }
   }
 }

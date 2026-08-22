@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PackMetadataInjector implements DatapackInjector {
-    private static final double[] PACK_FORMAT = new double[] {107.1, 1};
+    private static final int PACK_FORMAT = 81; // ** format de datapack de Minecraft 1.21.7
 
     @Override
     public void inject(File rootFile) {
@@ -26,11 +26,13 @@ public class PackMetadataInjector implements DatapackInjector {
                 {
                   "pack": {
                     "description": "OMC datapack injected from plugin",
-                    "pack_format": %s,
-                    "min_format": [%s, %s],
-                    "max_format": [%s, %s]
+                    "pack_format": %d,
+                    "supported_formats": {
+                      "min_inclusive": %d,
+                      "max_inclusive": %d
+                    }
                   }
                 }
-                """, PACK_FORMAT[0], PACK_FORMAT[0], PACK_FORMAT[1], PACK_FORMAT[0], PACK_FORMAT[1]);
+                """, PACK_FORMAT, PACK_FORMAT, PACK_FORMAT);
     }
 }

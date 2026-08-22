@@ -1,7 +1,9 @@
 package fr.openmc.core.registry.ambient;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import fr.openmc.api.datapacks.builders.BiomeBuilder;
+import fr.openmc.api.datapacks.builders.EnvironnementAttributeBuilder;
 import fr.openmc.api.datapacks.injectors.BiomesInjector;
 import fr.openmc.core.features.leaderboards.LeaderboardManager;
 import fr.openmc.core.registry.ambient.builder.AmbientBuilder;
@@ -149,29 +151,36 @@ public abstract class CustomAmbient {
         if (!this.getAmbientBuilder().utilizeBiome()) return null;
 
         JsonObject effects = this.getAmbientBuilder().getBiomeBuilder().getEffects();
-        Optional<Integer> grassColor = hasEffects(effects, "grass_color") ?
-                Optional.of(MathUtils.hexToInt(effects.get("grass_color").getAsString())) :
-                initialEffects.getGrassColorOverride();
-        Optional<Integer> foliageColor = hasEffects(effects, "foliage_color") ?
-                Optional.of(MathUtils.hexToInt(effects.get("foliage_color").getAsString())) :
-                initialEffects.getFoliageColorOverride();
-        Integer waterColor = hasEffects(effects, "water_color") ?
-                MathUtils.hexToInt(effects.get("water_color").getAsString()) :
-                initialEffects.getWaterColor();
-        Optional<Integer> dryFoliageColor = hasEffects(effects, "dry_foliage_color") ?
-                Optional.of(MathUtils.hexToInt(effects.get("dry_foliage_color").getAsString())) :
-                initialEffects.getFoliageColorOverride();
+        Optional<Integer> grassColor = colorOverride(effects, "grass_color")
+                .or(initialEffects::getGrassColorOverride);
+        Optional<Integer> foliageColor = colorOverride(effects, "foliage_color")
+                .or(initialEffects::getFoliageColorOverride);
+        Integer waterColor = colorOverride(effects, "water_color")
+                .orElseGet(initialEffects::getWaterColor);
+        Optional<Integer> dryFoliageColor = colorOverride(effects, "dry_foliage_color")
+                .or(initialEffects::getDryFoliageColorOverride);
         String grassColorModifier = hasEffects(effects, "grass_color_modifier") ?
                 effects.get("grass_color_modifier").getAsString() :
                 initialEffects.getGrassColorModifier().getSerializedName();
 
+        // ** fog/sky/water_fog sont obligatoires dans un biome 1.21.7, on reprend ceux du biome initial
         BiomeBuilder builder = new BiomeBuilder()
                 .waterColor(waterColor)
                 .grassColorModifier(grassColorModifier)
                 .hasPrecipitation(climate.hasPrecipitation())
                 .downfall(climate.downfall())
                 .temperatures(climate.temperature())
-                .temperatureModifier(climate.temperatureModifier().getName());
+                .temperatureModifier(climate.temperatureModifier().getName())
+                .effects(obj -> {
+                    obj.addProperty("fog_color", initialEffects.getFogColor());
+                    obj.addProperty("sky_color", initialEffects.getSkyColor());
+                    obj.addProperty("water_fog_color", initialEffects.getWaterFogColor());
+                });
+
+        // ** les attributs d'environnement (particules, sons, couleurs de brouillard) de l'ambience
+        // ** passent par les effects du biome en 1.21.7
+        EnvironnementAttributeBuilder attributes = this.getAmbientBuilder().getDimTypeBuilder().getAttributesBuilder();
+        if (attributes != null) builder.attributes(attributes);
 
         grassColor.ifPresent(builder::grassColor);
         foliageColor.ifPresent(builder::foliageColor);
@@ -182,6 +191,19 @@ public abstract class CustomAmbient {
 
     private boolean hasEffects(JsonObject effects, String envKey) {
         return effects.get(envKey) != null;
+    }
+
+    /**
+     * Récupère une couleur override par l'ambience, que celle ci soit un entier ou un hexadécimal
+     * @param effects les effects de l'ambience
+     * @param envKey la clé de la couleur
+     * @return la couleur en entier si elle est override
+     */
+    private Optional<Integer> colorOverride(JsonObject effects, String envKey) {
+        if (!hasEffects(effects, envKey)) return Optional.empty();
+
+        JsonPrimitive value = effects.getAsJsonPrimitive(envKey);
+        return Optional.of(value.isNumber() ? value.getAsInt() : MathUtils.hexToInt(value.getAsString()));
     }
 
     /**

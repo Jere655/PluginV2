@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import fr.openmc.api.datapacks.injectors.TimelinesInjector;
+import lombok.Getter;
 
 /**
  * Exemple simple d'un dimension type :
@@ -57,6 +58,8 @@ public final class DimensionTypeBuilder {
         }
     }
 
+    @Getter
+    private EnvironnementAttributeBuilder attributesBuilder;
     private JsonObject attributes;
     private Double ambientLight = 0.0;
     private Double coordinateScale = 1.0;
@@ -76,6 +79,7 @@ public final class DimensionTypeBuilder {
     private String timelines = "#minecraft:in_overworld";
 
     public DimensionTypeBuilder attributesBuilder(EnvironnementAttributeBuilder builder) {
+        this.attributesBuilder = builder;
         this.attributes = builder.getOutputData();
         return this;
     }

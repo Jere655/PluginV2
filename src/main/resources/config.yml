@@ -1,8 +1,18 @@
 #####
-# Database
+# Database (MySQL / MariaDB obligatoire)
 #####
+# OpenMC stocke toutes ses donnees persistantes en base : economie (argent, banque,
+# transactions, bits), villes et mascottes, boutiques, homes, amis, boites aux lettres,
+# parametres joueur, milestones, cooldowns, analytics, liaison Discord, contributeurs
+# GitHub, evenements (quotidiens, hebdomadaires, contest, halloween) et les Reves.
+# Le plugin ne demarre pas sans une base accessible.
+#
+# url      : URL JDBC complete, au format jdbc:mysql://<adresse>:<port>/<base>
+#            La base (ici "openmc") doit deja exister sur le serveur MySQL/MariaDB.
+# username : utilisateur MySQL/MariaDB ayant les droits sur cette base.
+# password : mot de passe de cet utilisateur.
 database:
-  url: "jdbc:mysql://host:port/openmc"
+  url: "jdbc:mysql://127.0.0.1:3306/openmc"
   username: ""
   password: ""
 

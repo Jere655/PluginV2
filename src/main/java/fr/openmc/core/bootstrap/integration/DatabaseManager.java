@@ -19,6 +19,15 @@ public class DatabaseManager {
     @Getter
     private static ConnectionSource connectionSource;
 
+    private static final String CONFIG_HELP = """
+            OpenMC a besoin d'une base MySQL/MariaDB pour demarrer.
+            Renseignez la section "database" de plugins/OpenMC/config.yml :
+              database:
+                url: "jdbc:mysql://<adresse>:<port>/<base>"   (ex: jdbc:mysql://127.0.0.1:3306/openmc)
+                username: "<utilisateur>"
+                password: "<mot de passe>"
+            La base indiquee doit exister et l'utilisateur doit avoir les droits dessus.""";
+
     /**
      * Initialise le driver, la connexion pool et les features de type DB.
      *
@@ -42,7 +51,11 @@ public class DatabaseManager {
             String databaseUrl = config.getString("database.url");
             String username = config.getString("database.username");
             String password = config.getString("database.password");
+
+            if (!OMCPlugin.isUnitTestVersion()) checkConfiguration(databaseUrl, username);
+
             connectionSource = new JdbcPooledConnectionSource(databaseUrl, username, password);
+            if (!OMCPlugin.isUnitTestVersion()) checkConnection(databaseUrl, username);
 
             OMCPlugin.getInstance().REGISTRY_HOOKS
                     .forEach(h -> {
@@ -77,11 +90,51 @@ public class DatabaseManager {
                         }
                     });
         } catch (SQLException e) {
-            OMCLogger.error("Failed to initialize the database connection.", e);
-            throw new RuntimeException(e);
+            throw new DatabaseConfigurationException(
+                    "Connexion a la base impossible : " + e.getMessage() + "\n" + CONFIG_HELP, e);
         } catch (ConnectionPendingException e) {
             OMCLogger.error("Database connection is pending. Please check your database configuration.");
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Verifie que la configuration DB est exploitable avant toute tentative de connexion.
+     *
+     * @param databaseUrl URL JDBC configuree
+     * @param username Utilisateur configure
+     * @throws DatabaseConfigurationException Si l'URL ou l'utilisateur est absent ou encore a sa valeur d'exemple
+     */
+    private static void checkConfiguration(String databaseUrl, String username) {
+        if (databaseUrl == null || databaseUrl.isBlank())
+            throw new DatabaseConfigurationException("\"database.url\" n'est pas renseigne.\n" + CONFIG_HELP);
+
+        if (!databaseUrl.startsWith("jdbc:"))
+            throw new DatabaseConfigurationException(
+                    "\"database.url\" (" + databaseUrl + ") n'est pas une URL JDBC.\n" + CONFIG_HELP);
+
+        if (databaseUrl.contains("host:port") || databaseUrl.contains("<"))
+            throw new DatabaseConfigurationException(
+                    "\"database.url\" (" + databaseUrl + ") contient encore une valeur d'exemple.\n" + CONFIG_HELP);
+
+        if (username == null || username.isBlank())
+            throw new DatabaseConfigurationException("\"database.username\" n'est pas renseigne.\n" + CONFIG_HELP);
+    }
+
+    /**
+     * Verifie que la base configuree est joignable, la connexion ORMLite etant paresseuse.
+     *
+     * @param databaseUrl URL JDBC configuree
+     * @param username Utilisateur configure
+     * @throws DatabaseConfigurationException Si la base est injoignable ou refuse la connexion
+     */
+    private static void checkConnection(String databaseUrl, String username) {
+        try {
+            connectionSource.releaseConnection(connectionSource.getReadWriteConnection(null));
+        } catch (SQLException e) {
+            throw new DatabaseConfigurationException(
+                    "Connexion impossible a " + databaseUrl + " avec l'utilisateur \"" + username + "\" : "
+                            + e.getMessage() + "\n" + CONFIG_HELP, e);
         }
     }
 

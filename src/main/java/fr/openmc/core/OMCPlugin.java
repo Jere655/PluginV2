@@ -8,6 +8,7 @@ import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.FeatureFactory;
 import fr.openmc.core.bootstrap.features.FeatureLoadingType;
 import fr.openmc.core.bootstrap.hooks.Hooks;
+import fr.openmc.core.bootstrap.integration.DatabaseConfigurationException;
 import fr.openmc.core.bootstrap.integration.DatabaseManager;
 import fr.openmc.core.bootstrap.integration.ErrorReporter;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
@@ -167,7 +168,14 @@ public class OMCPlugin extends JavaPlugin {
         saveDefaultConfig();
         configs = this.getConfig();
         OMCLogger.setRuntimeLogger(this.getSLF4JLogger());
-        DatabaseManager.init();
+
+        try {
+            DatabaseManager.init();
+        } catch (DatabaseConfigurationException e) {
+            OMCLogger.error(e.getMessage());
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         /* EXTERNALS */
         MenuLib.init(this);

@@ -23,6 +23,8 @@ public class ShopFurniture {
 		if (customFurniture == null || block.getType() != Material.AIR) return false;
 		
 		CustomFurniture furniture = CustomFurniture.spawn(OMCRegistry.CUSTOM_ITEMS.CAISSE.getId(), block);
+		if (furniture == null || furniture.getEntity() == null) return false;
+		
 		furniture.getEntity().setRotation(playerYaw.getPlayerYaw(), 0);
 		return true;
 	}
@@ -34,10 +36,11 @@ public class ShopFurniture {
 	 * @return true if the furniture was successfully removed, false otherwise.
 	 */
 	public static boolean removeShopFurniture(Block block) {
-		CustomStack placed = CustomFurniture.byAlreadySpawned(block);
+		CustomFurniture placed = CustomFurniture.byAlreadySpawned(block);
 		if (placed == null || !placed.getNamespacedID().equals(OMCRegistry.CUSTOM_ITEMS.CAISSE.getId())) return false;
+		if (placed.getEntity() == null) return false;
 		
-		CustomFurniture.remove(CustomFurniture.byAlreadySpawned(block).getEntity(), false);
+		CustomFurniture.remove(placed.getEntity(), false);
 		return true;
 	}
 	

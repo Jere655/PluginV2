@@ -4,6 +4,7 @@ import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.CustomStack;
 import fr.openmc.core.CommandsManager;
 import fr.openmc.core.bootstrap.features.types.HasListeners;
+import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.bootstrap.listeners.ListenerFactory;
 import fr.openmc.core.bootstrap.registries.KeyedRegistry;
 import fr.openmc.core.bootstrap.registries.Registry;
@@ -20,6 +21,7 @@ import fr.openmc.core.features.itemsadder.elevator.ElevatorColor;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.registry.items.contents.AywenCap;
 import fr.openmc.core.registry.items.contents.Hammer;
+import fr.openmc.core.registry.items.keys.KeyBlock;
 import fr.openmc.core.registry.items.listeners.BlockBreakListener;
 import fr.openmc.core.registry.items.listeners.BlockPlaceListener;
 import fr.openmc.core.registry.items.listeners.EquipableItemListener;
@@ -35,6 +37,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -294,6 +297,41 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
     @Override
     public void postInit() {
         CommandsManager.getHandler().register(new CustomItemsDebugCommand());
+        auditItemsAdderContents();
+    }
+
+    /**
+     * Liste les contenus attendus par OpenMC qui sont absents du fournisseur ItemsAdder.
+     * Ces items retombent sur leur variante vanilla au lieu de casser la feature qui les utilise.
+     */
+    private void auditItemsAdderContents() {
+        if (!ItemsAdderHook.isEnable()) return;
+
+        List<String> missingItems = values().stream()
+                .map(CustomItem::getId)
+                .filter(id -> CustomStack.getInstance(id) == null)
+                .sorted()
+                .toList();
+
+        List<String> missingBlocks = KeyBlock.getKnownCustomIDs().stream()
+                .filter(id -> CustomBlock.getInstance(id) == null)
+                .sorted()
+                .toList();
+
+        if (missingItems.isEmpty() && missingBlocks.isEmpty()) {
+            OMCLogger.successFormatted("Tous les contenus ItemsAdder attendus par OpenMC sont disponibles");
+            return;
+        }
+
+        if (!missingItems.isEmpty()) {
+            OMCLogger.warnFormatted("{} items ItemsAdder attendus par OpenMC sont introuvables (variante vanilla utilisée) : {}",
+                    missingItems.size(), String.join(", ", missingItems));
+        }
+
+        if (!missingBlocks.isEmpty()) {
+            OMCLogger.warnFormatted("{} blocs ItemsAdder attendus par OpenMC sont introuvables (features dégradées, pas désactivées) : {}",
+                    missingBlocks.size(), String.join(", ", missingBlocks));
+        }
     }
 
     @Override
@@ -303,6 +341,7 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
 
     @Override
     public Optional<CustomItem> get(String id) {
+        if (id == null) return Optional.empty();
         if (super.get(id).isPresent()) return super.get(id);
 
         return values().stream()
@@ -330,8 +369,7 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
     public Optional<CustomItem> get(Block block) {
         if (block == null) return Optional.empty();
 
-        if (!ItemsAdderHook.isEnable())
-            throw new IllegalStateException("Impossible d'avoir un CustomItem via un Block, néccésite que ItemsAdder soit activé");
+        if (!ItemsAdderHook.isEnable()) return Optional.empty();
 
         CustomBlock customBlock = CustomBlock.byAlreadyPlaced(block);
 
@@ -348,6 +386,9 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
 
         if (id == null && ItemsAdderHook.isEnable()) {
             CustomStack itemIa = CustomStack.byItemStack(stack);
+
+            if (itemIa == null)
+                throw new IllegalArgumentException("Aucun CustomItem ne correspond à l'ItemStack " + stack.getType());
 
             return this.getOrThrow(itemIa.getNamespacedID());
         } else {

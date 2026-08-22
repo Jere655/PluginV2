@@ -186,7 +186,10 @@ public class Page1 implements Menu {
                 content.put(slot, profilItem);
         });
 
-        ItemStack playerHeadProfileItem = CustomStack.getInstance("omc_main_menu:player_head").getItemStack();
+        CustomStack playerHeadStack = CustomStack.getInstance("omc_main_menu:player_head");
+        ItemStack playerHeadProfileItem = playerHeadStack != null
+                ? playerHeadStack.getItemStack()
+                : ItemStack.of(Material.PLAYER_HEAD);
         playerHeadProfileItem.editMeta(meta -> {
             meta.customName(TranslationManager.translation("feature.mainmenu.item.profile.name")
                     .color(NamedTextColor.YELLOW)

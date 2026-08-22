@@ -61,7 +61,7 @@ public class PeeledObeseCropsListener implements Listener {
 
         peeledVarientBlock.place(clickedBlock.getLocation());
 
-        BehaviourUpBlock.onBreak(clickedBlock, keyBlock.getCustomBlock().getNamespacedID());
+        BehaviourUpBlock.onBreak(clickedBlock, keyBlock.getNamespacedID());
 
         ItemUtils.reduceDurability(itemInHand, 5);
     }

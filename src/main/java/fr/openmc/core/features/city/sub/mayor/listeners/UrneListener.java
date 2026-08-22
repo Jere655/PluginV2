@@ -1,5 +1,6 @@
 package fr.openmc.core.features.city.sub.mayor.listeners;
 
+import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
 import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
 import dev.lone.itemsadder.api.Events.FurniturePlacedEvent;
@@ -36,10 +37,13 @@ public class UrneListener implements Listener {
     public void onUrneInteractEvent(FurnitureInteractEvent event) {
         if (!Objects.equals(event.getNamespacedID(), "omc_blocks:urne")) return;
 
+        CustomFurniture furniture = event.getFurniture();
+        if (furniture == null || furniture.getEntity() == null) return;
+
         Player player = event.getPlayer();
         City playerCity = CityManager.getPlayerCity(player.getUniqueId());
 
-        Chunk chunk = event.getFurniture().getEntity().getChunk();
+        Chunk chunk = furniture.getEntity().getChunk();
         City city = CityManager.getCityFromChunk(chunk.getX(), chunk.getZ());
 
         if (playerCity == null) {
@@ -49,7 +53,7 @@ public class UrneListener implements Listener {
 
         if (city == null) {
             if (player.getGameMode() != GameMode.CREATIVE) {
-                event.getFurniture().remove(false);
+                furniture.remove(false);
             }
 
             MessagesManager.sendMessage(player, TranslationManager.translation("feature.city.mayor.error.not_in_city"), Prefix.MAYOR, MessageType.ERROR, false);
@@ -133,12 +137,16 @@ public class UrneListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     private void onUrnePlaceSuccessEvent(FurniturePlacedEvent event) {
-        Location urneLocation = event.getFurniture().getEntity().getLocation();
         if (!FancyNpcsHook.isEnable())
             return;
 
         if (!"omc_blocks:urne".equals(event.getNamespacedID()))
             return;
+
+        CustomFurniture furniture = event.getFurniture();
+        if (furniture == null || furniture.getEntity() == null) return;
+
+        Location urneLocation = furniture.getEntity().getLocation();
 
         Player player = event.getPlayer();
         City playerCity = CityManager.getPlayerCity(player.getUniqueId());

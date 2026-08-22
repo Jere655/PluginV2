@@ -122,13 +122,12 @@ public class ElevatorBlockListener implements Listener {
 
         if (targetColor == null) return;
 
-        if (block.matchNamespacedID(targetColor.getCustomItem().getCustomStack())) return;
-
         CustomStack result = targetColor.getCustomItem().getCustomStack();
 
-        if (result != null) {
-            inv.setResult(result.getItemStack());
-        }
+        if (result == null) return;
+        if (block.matchNamespacedID(result)) return;
+
+        inv.setResult(result.getItemStack());
     }
 
     @EventHandler

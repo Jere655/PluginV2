@@ -75,6 +75,8 @@ dependencies {
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
+    testCompileOnly "beer.devs:itemsadder-api:${itemsAdderVersion}"
+
     testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"

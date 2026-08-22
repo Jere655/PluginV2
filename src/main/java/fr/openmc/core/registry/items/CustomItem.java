@@ -8,6 +8,7 @@ import fr.openmc.core.utils.bukkit.ItemUtils;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -34,16 +35,24 @@ public abstract class CustomItem {
 
     public abstract @NotNull ItemStack getVanilla();
 
-    public ItemStack getItemsAdder() {
-        CustomStack stack = CustomStack.getInstance(getId());
+    public @Nullable ItemStack getItemsAdder() {
+        CustomStack stack = getCustomStack();
         return stack != null ? stack.getItemStack() : null;
     }
 
-    public CustomStack getCustomStack() {
+    /**
+     * @return l'item du fournisseur ItemsAdder, ou null s'il ne connait pas cet id
+     */
+    public @Nullable CustomStack getCustomStack() {
+        if (!ItemsAdderHook.isEnable()) return null;
         return CustomStack.getInstance(getId());
     }
 
-    public CustomBlock getCustomBlock() {
+    /**
+     * @return le bloc du fournisseur ItemsAdder, ou null si cet id n'est pas un bloc connu
+     */
+    public @Nullable CustomBlock getCustomBlock() {
+        if (!ItemsAdderHook.isEnable()) return null;
         return CustomBlock.getInstance(getId());
     }
 

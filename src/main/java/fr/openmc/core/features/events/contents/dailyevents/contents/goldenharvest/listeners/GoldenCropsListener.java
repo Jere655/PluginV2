@@ -3,7 +3,6 @@ package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharve
 import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
 import fr.openmc.core.OMCPlugin;
-import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.events.contents.dailyevents.DailyEventsManager;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.AbondanceArmorManager;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.GoldenHarvestEvent;
@@ -59,8 +58,7 @@ public class GoldenCropsListener implements Listener {
         if (ThreadLocalRandom.current().nextDouble() > GoldenHarvestManager.GOLDEN_CROP_ON_OBESE_CHANCE) return;
         if (!ObeseCropsRegistry.isObeseCrop(event.getBlock().getLocation())) return;
 
-        CustomBlock customBlock = CustomBlock.byItemStack(event.getCustomBlockItem());
-        KeyBlock keyBlock = KeyBlock.custom(OMCRegistry.CUSTOM_ITEMS.getOrThrow(customBlock.getItemStack()));
+        KeyBlock keyBlock = KeyBlock.custom(event.getNamespacedID());
 
         ItemLoot itemLoot = GoldenHarvestManager.getGoldenCropsOnBreakMapping().get(keyBlock);
         if (itemLoot == null) return;

@@ -1,9 +1,7 @@
 package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.listeners;
 
-import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
 import fr.openmc.core.OMCRegistry;
-import fr.openmc.core.registry.items.CustomItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,15 +18,14 @@ import org.bukkit.event.Listener;
 public class FixGoldenBlockListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onGoldenBlockBreak(CustomBlockBreakEvent event) {
-        CustomItem brokenItem = OMCRegistry.CUSTOM_ITEMS.get(event.getNamespacedID()).orElse(null);
-        if (brokenItem == null) return;
-        CustomBlock broken = brokenItem.getCustomBlock();
+        String brokenID = event.getNamespacedID();
+        if (OMCRegistry.CUSTOM_ITEMS.get(brokenID).isEmpty()) return;
 
-        Material attachedStemType = broken.getNamespacedID().contains("pumpkin")
+        Material attachedStemType = brokenID.contains("pumpkin")
                 ? Material.ATTACHED_PUMPKIN_STEM
                 : Material.ATTACHED_MELON_STEM;
 
-        Material stemType = broken.getNamespacedID().contains("pumpkin")
+        Material stemType = brokenID.contains("pumpkin")
                 ? Material.PUMPKIN_STEM
                 : Material.MELON_STEM;
 

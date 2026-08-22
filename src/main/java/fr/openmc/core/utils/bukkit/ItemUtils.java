@@ -4,6 +4,7 @@ import dev.lone.itemsadder.api.CustomStack;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.mailboxes.MailboxManager;
+import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
@@ -58,8 +59,17 @@ public class ItemUtils {
         return getItemTranslation(stack.getType());
     }
 
+    /**
+     * @return le {@link CustomStack} correspondant, ou null si ItemsAdder est absent
+     * ou ne connait pas cet item
+     */
+    private static CustomStack getCustomStack(ItemStack stack) {
+        if (stack == null || !ItemsAdderHook.isEnable()) return null;
+        return CustomStack.byItemStack(stack);
+    }
+
     public static Component getItemName(ItemStack stack) {
-        CustomStack customItem = CustomStack.byItemStack(stack);
+        CustomStack customItem = getCustomStack(stack);
         if (customItem != null) {
             Component customName = stack.getItemMeta().customName();
             return customName != null ? customName : stack.displayName();
@@ -476,9 +486,9 @@ public class ItemUtils {
      * @return true si les items sont similaires, false sinon
      */
     public static boolean isSimilar(ItemStack item1, ItemStack item2) {
-        CustomStack customItem = CustomStack.byItemStack(item1);
+        CustomStack customItem = getCustomStack(item1);
         if (customItem != null) {
-            CustomStack customIs = CustomStack.byItemStack(item2);
+            CustomStack customIs = getCustomStack(item2);
             return customIs != null && customIs.getId().equals(customItem.getId());
         }
 
@@ -497,9 +507,9 @@ public class ItemUtils {
      */
     @SuppressWarnings("UnstableApiUsage")
     public static boolean isSimilarMenu(ItemStack item1, ItemStack item2) {
-        CustomStack customItem = CustomStack.byItemStack(item1);
+        CustomStack customItem = getCustomStack(item1);
         if (customItem != null) {
-            CustomStack customIs = CustomStack.byItemStack(item2);
+            CustomStack customIs = getCustomStack(item2);
             return customIs != null && customIs.getId().equals(customItem.getId());
         }
 

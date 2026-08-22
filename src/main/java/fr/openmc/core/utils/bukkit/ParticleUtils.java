@@ -152,6 +152,16 @@ public class ParticleUtils {
             }
         }
 
+        // * La data attendue depend de la version du serveur, on ignore une data incompatible
+        Class<?> dataType = particle.getDataType();
+        if (dataType == Void.class) {
+            resolvedData = null;
+        } else if (resolvedData != null && !dataType.isInstance(resolvedData)) {
+            Supplier<Object> fallback = PARTICLE_FALLBACKS.get(particle.getKey().getKey());
+            Object fallbackData = fallback != null ? fallback.get() : null;
+            resolvedData = dataType.isInstance(fallbackData) ? fallbackData : null;
+        }
+
         ClientboundLevelParticlesPacket packet = new ClientboundLevelParticlesPacket(
                 CraftParticle.createParticleParam(particle, resolvedData),
                 false,

@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
@@ -28,6 +29,6 @@ public class PlayerPositionNMS {
     }
 
     public static void sendPos(Player player, Location location) {
-        sendPos((ServerPlayer) player, new Vec3(location.getX(), location.getY(), location.getZ()));
+        sendPos(((CraftPlayer) player).getHandle(), new Vec3(location.getX(), location.getY(), location.getZ()));
     }
 }

@@ -53,7 +53,7 @@ public class MainMenuListener implements Listener {
                 org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(getInvisibleItem()),
                 PaperAdventure.asVanilla(TranslationManager.translation("feature.mainmenu.advancements.loading")),
                 Component.empty(),
-                null,
+                Optional.empty(),
                 AdvancementType.GOAL,
                 false,
                 false,

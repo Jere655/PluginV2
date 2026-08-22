@@ -53,7 +53,7 @@ public class ToastUtils {
                         org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item),
                         PaperAdventure.asVanilla(name),
                         PaperAdventure.asVanilla(description),
-                        null,
+                        Optional.empty(),
                         type,
                         true,
                         false,

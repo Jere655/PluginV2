@@ -3,6 +3,7 @@ package fr.openmc.core.hooks.craftengine;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -92,9 +93,9 @@ public final class ItemsAdderCategoryConverter {
     }
 
     private String toItemId(String id) {
-        String value = id.trim();
-        if (value.contains(":")) return value.toLowerCase();
-        return "minecraft:" + value.toLowerCase();
+        String value = id.trim().toLowerCase(Locale.ROOT);
+        if (value.contains(":")) return value;
+        return namespace + ":" + value;
     }
 
     private List<String> stringList(Object value) {

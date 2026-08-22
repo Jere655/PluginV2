@@ -2,6 +2,7 @@ package fr.openmc.core;
 
 import fr.openmc.core.bootstrap.integration.DatapackLoader;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
+import fr.openmc.core.hooks.craftengine.CraftEnginePackGenerator;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
@@ -35,6 +36,12 @@ public class OMCBootstrap implements PluginBootstrap {
 
         // ** LOAD ITEMS ADDER NAMESPACES **
         ItemsAdderHook.copyContentsToItemsAdder(context, "contents");
+
+        // ** CONVERT ITEMS ADDER CONTENTS FOR CRAFT ENGINE **
+        CraftEnginePackGenerator.generate(
+                context.getDataDirectory().toFile().getParentFile(),
+                context.getDataDirectory().resolve("craftengine-conversion-report.txt").toFile()
+        );
 
         // ** REGISTRY MANAGER **
         OMCRegistry.bootstrapAll(context);

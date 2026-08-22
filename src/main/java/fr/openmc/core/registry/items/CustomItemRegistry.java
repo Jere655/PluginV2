@@ -18,6 +18,8 @@ import fr.openmc.core.features.events.contents.dailyevents.contents.miraculousfi
 import fr.openmc.core.features.events.contents.dailyevents.contents.miraculousfishing.contents.items.RareFishingTreasureLootbox;
 import fr.openmc.core.features.itemsadder.elevator.ElevatorBlock;
 import fr.openmc.core.features.itemsadder.elevator.ElevatorColor;
+import fr.openmc.core.hooks.craftengine.ConversionReport;
+import fr.openmc.core.hooks.craftengine.CraftEnginePackGenerator;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.registry.items.contents.AywenCap;
 import fr.openmc.core.registry.items.contents.Hammer;
@@ -37,6 +39,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -297,7 +300,47 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
     @Override
     public void postInit() {
         CommandsManager.getHandler().register(new CustomItemsDebugCommand());
+        auditConvertedContents();
         auditItemsAdderContents();
+    }
+
+    /**
+     * Compare les identifiants attendus par OpenMC à ceux réellement écrits dans le pack CraftEngine
+     * généré depuis les contenus ItemsAdder.
+     */
+    private void auditConvertedContents() {
+        ConversionReport report = CraftEnginePackGenerator.getLastReport();
+        if (report == null) return;
+
+        Set<String> converted = new HashSet<>(report.getItemIDs());
+        converted.addAll(report.getBlockIDs());
+        converted.addAll(report.getFurnitureIDs());
+
+        List<String> missing = values().stream()
+                .map(CustomItem::getId)
+                .filter(id -> !id.startsWith("_iainternal:"))
+                .filter(id -> !converted.contains(id))
+                .sorted()
+                .toList();
+
+        List<String> missingBlocks = KeyBlock.getKnownCustomIDs().stream()
+                .filter(id -> !report.getBlockIDs().contains(id))
+                .sorted()
+                .toList();
+
+        if (missing.isEmpty() && missingBlocks.isEmpty()) {
+            OMCLogger.successFormatted("Tous les contenus OpenMC attendus ont été convertis vers CraftEngine");
+            return;
+        }
+
+        if (!missing.isEmpty()) {
+            OMCLogger.warnFormatted("{} items OpenMC absents du pack CraftEngine généré : {}",
+                    missing.size(), String.join(", ", missing));
+        }
+        if (!missingBlocks.isEmpty()) {
+            OMCLogger.warnFormatted("{} blocs OpenMC absents du pack CraftEngine généré : {}",
+                    missingBlocks.size(), String.join(", ", missingBlocks));
+        }
     }
 
     /**

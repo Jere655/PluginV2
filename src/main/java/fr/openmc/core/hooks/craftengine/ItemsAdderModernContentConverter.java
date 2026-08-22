@@ -1,13 +1,15 @@
 package fr.openmc.core.hooks.craftengine;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /**
  * Convertit les propriétés ItemsAdder modernes qui n'étaient pas prises en charge
- * par le convertisseur historique : équipements 1.21.2+ et consommables 1.21.4+.
+ * par le convertisseur historique : équipements, consommables, attributs et enchantements.
  */
 public final class ItemsAdderModernContentConverter {
     private final String namespace;
@@ -40,6 +42,8 @@ public final class ItemsAdderModernContentConverter {
                 Map<String, Object> definition = new LinkedHashMap<>(asSection(entry.getValue()));
                 definition.remove("equipment");
                 definition.remove("consumable");
+                definition.remove("attribute_modifiers");
+                definition.remove("enchants");
                 sanitizedItems.put(entry.getKey(), definition);
             }
             sanitized.put("items", sanitizedItems);
@@ -108,6 +112,15 @@ public final class ItemsAdderModernContentConverter {
                 applyConsumable(fullId, consumable, item);
             }
 
+            Map<String, Object> attributes = asSection(definition.get("attribute_modifiers"));
+            if (!attributes.isEmpty()) {
+                applyAttributeModifiers(fullId, attributes, item);
+            }
+
+            if (definition.containsKey("enchants")) {
+                applyEnchantments(fullId, definition.get("enchants"), item);
+            }
+
             convertedItems.put(fullId, item);
         }
     }
@@ -125,8 +138,6 @@ public final class ItemsAdderModernContentConverter {
             settings.put("equipment", target);
             item.put("settings", settings);
         } else if (slot != null) {
-            // Cas typique des casques 3D ItemsAdder : écrase le composant vanilla
-            // sans asset_id afin que le modèle de l'item reste visible sur la tête.
             Map<String, Object> data = mutableSection(item.get("data"));
             data.put("equippable", Map.of("slot", slot));
             item.put("data", data);
@@ -155,13 +166,130 @@ public final class ItemsAdderModernContentConverter {
         data.put("food", food);
 
         Map<String, Object> components = mutableSection(data.get("components"));
-        // La présence du composant vanilla rend l'item consommable sur 1.21.4+.
-        // Les valeurs par défaut de Minecraft/CraftEngine fournissent l'animation et la durée.
         components.put("minecraft:consumable", new LinkedHashMap<>());
         data.put("components", components);
         item.put("data", data);
 
         report.getConsumableIDs().add(fullId);
+    }
+
+    /**
+     * ItemsAdder stocke les attributs sous forme slot -> nom -> valeur, par exemple
+     * mainhand.attackDamage=4. CraftEngine accepte une liste de modifiers avec type,
+     * slot, id déterministe et amount.
+     */
+    private void applyAttributeModifiers(String fullId, Map<String, Object> source, Map<String, Object> item) {
+        List<Map<String, Object>> converted = new ArrayList<>();
+
+        for (Map.Entry<String, Object> slotEntry : source.entrySet()) {
+            String slot = normalizeSlot(slotEntry.getKey());
+            if (slot == null) {
+                report.unsupported(fullId, "slot d'attribut ItemsAdder inconnu : " + slotEntry.getKey());
+                continue;
+            }
+
+            Map<String, Object> modifiers = asSection(slotEntry.getValue());
+            for (Map.Entry<String, Object> modifierEntry : modifiers.entrySet()) {
+                if (!(modifierEntry.getValue() instanceof Number amount)) {
+                    report.unsupported(fullId, "valeur d'attribut non numérique : " + modifierEntry.getKey());
+                    continue;
+                }
+
+                String attribute = normalizeAttribute(modifierEntry.getKey());
+                Map<String, Object> modifier = new LinkedHashMap<>();
+                modifier.put("type", attribute);
+                modifier.put("slot", slot);
+                modifier.put("id", modifierId(fullId, slot, attribute));
+                modifier.put("amount", amount.doubleValue());
+                converted.add(modifier);
+            }
+        }
+
+        if (converted.isEmpty()) return;
+
+        Map<String, Object> data = mutableSection(item.get("data"));
+        data.put("attribute_modifiers", converted);
+        item.put("data", data);
+    }
+
+    /**
+     * Convertit les formes ItemsAdder les plus courantes :
+     * - liste : [minecraft:sharpness:10]
+     * - map : {minecraft:sharpness: 10}
+     */
+    private void applyEnchantments(String fullId, Object source, Map<String, Object> item) {
+        Map<String, Object> enchantments = new LinkedHashMap<>();
+
+        if (source instanceof List<?> list) {
+            for (Object raw : list) {
+                parseEnchantment(fullId, String.valueOf(raw), enchantments);
+            }
+        } else if (source instanceof Map<?, ?> map) {
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (entry.getValue() instanceof Number level) {
+                    enchantments.put(normalizeEnchantmentId(String.valueOf(entry.getKey())), level.intValue());
+                } else {
+                    report.unsupported(fullId, "niveau d'enchantement non numérique : " + entry.getKey());
+                }
+            }
+        } else if (source != null) {
+            parseEnchantment(fullId, String.valueOf(source), enchantments);
+        }
+
+        if (enchantments.isEmpty()) return;
+
+        Map<String, Object> data = mutableSection(item.get("data"));
+        data.put("enchantments", enchantments);
+        item.put("data", data);
+    }
+
+    private void parseEnchantment(String fullId, String raw, Map<String, Object> enchantments) {
+        int separator = raw.lastIndexOf(':');
+        if (separator <= 0 || separator == raw.length() - 1) {
+            report.unsupported(fullId, "format d'enchantement ItemsAdder non reconnu : " + raw);
+            return;
+        }
+
+        String id = raw.substring(0, separator);
+        String levelText = raw.substring(separator + 1);
+        try {
+            int level = Integer.parseInt(levelText);
+            enchantments.put(normalizeEnchantmentId(id), level);
+        } catch (NumberFormatException exception) {
+            report.unsupported(fullId, "niveau d'enchantement invalide : " + raw);
+        }
+    }
+
+    private String normalizeAttribute(String attribute) {
+        if (attribute.contains(":")) return attribute.toLowerCase(Locale.ROOT);
+
+        StringBuilder normalized = new StringBuilder("minecraft:");
+        for (int i = 0; i < attribute.length(); i++) {
+            char current = attribute.charAt(i);
+            if (Character.isUpperCase(current)) {
+                normalized.append('_').append(Character.toLowerCase(current));
+            } else {
+                normalized.append(Character.toLowerCase(current));
+            }
+        }
+        return normalized.toString();
+    }
+
+    private String normalizeEnchantmentId(String id) {
+        String normalized = id.toLowerCase(Locale.ROOT);
+        return normalized.contains(":") ? normalized : "minecraft:" + normalized;
+    }
+
+    private String modifierId(String fullId, String slot, String attribute) {
+        int separator = fullId.indexOf(':');
+        String itemNamespace = separator >= 0 ? fullId.substring(0, separator) : namespace;
+        String itemPath = separator >= 0 ? fullId.substring(separator + 1) : fullId;
+        String attributePath = attribute.contains(":") ? attribute.substring(attribute.indexOf(':') + 1) : attribute;
+        return itemNamespace + ":" + sanitizePath(itemPath + "_" + slot + "_" + attributePath);
+    }
+
+    private String sanitizePath(String value) {
+        return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_./-]", "_");
     }
 
     private String inferSlot(Map<String, Object> definition, Map<String, Object> equipment) {
@@ -185,10 +313,13 @@ public final class ItemsAdderModernContentConverter {
 
     private String normalizeSlot(String slot) {
         return switch (slot.toLowerCase(Locale.ROOT)) {
+            case "any" -> "any";
+            case "hand" -> "hand";
             case "head", "helmet" -> "head";
             case "chest", "chestplate" -> "chest";
             case "legs", "leggings" -> "legs";
             case "feet", "boots" -> "feet";
+            case "armor" -> "armor";
             case "body" -> "body";
             case "saddle" -> "saddle";
             case "mainhand", "main_hand" -> "mainhand";

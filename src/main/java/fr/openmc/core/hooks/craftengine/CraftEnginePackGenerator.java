@@ -118,7 +118,10 @@ public final class CraftEnginePackGenerator {
         if (!converter.getBlocks().isEmpty()) configuration.put("blocks", converter.getBlocks());
         if (!modernConverter.getEquipments().isEmpty()) configuration.put("equipments", modernConverter.getEquipments());
         if (!converter.getImages().isEmpty()) configuration.put("images", converter.getImages());
-        if (!converter.getRecipes().isEmpty()) configuration.put("recipes", converter.getRecipes());
+
+        Map<String, Object> allRecipes = new LinkedHashMap<>(converter.getRecipes());
+        allRecipes.putAll(modernConverter.getRecipes());
+        if (!allRecipes.isEmpty()) configuration.put("recipes", allRecipes);
 
         if (configuration.isEmpty()) return;
 

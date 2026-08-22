@@ -10,18 +10,27 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Convertit quelques propriétés ItemsAdder qui reposent encore sur des formats
- * historiques mais qui ont un équivalent sûr dans CraftEngine.
+ * historiques mais qui ont un équivalent sûr dans CraftEngine/OpenMC.
  *
  * <p>Actuellement :
  * <ul>
  *     <li>{@code components_nbt_file}: fusion des data-components JSON/YAML dans l'item CraftEngine.</li>
+ *     <li>{@code nbt}: conservation des PublicBukkitValues simples dans le custom_data CraftEngine.</li>
  *     <li>{@code blocked_enchants: [ALL]}: suppression du composant vanilla enchantable.</li>
+ *     <li>{@code blocked_enchants} spécifiques: marqueur PDC OpenMC, appliqué au runtime par BlockedEnchantListener.</li>
  * </ul>
  */
 public final class ItemsAdderLegacyPropertyConverter {
+    private static final Pattern PUBLIC_BUKKIT_VALUES = Pattern.compile(
+            "PublicBukkitValues\\s*:\\s*\\{(.*?)}", Pattern.DOTALL);
+    private static final Pattern STRING_ENTRY = Pattern.compile(
+            "[\\\"']?([a-zA-Z0-9_.:-]+)[\\\"']?\\s*:\\s*[\\\"']([^\\\"']*)[\\\"']");
+
     private final String namespace;
     private final File namespaceDir;
     private final ConversionReport report;
@@ -46,6 +55,7 @@ public final class ItemsAdderLegacyPropertyConverter {
             Map<String, Object> definition = new LinkedHashMap<>(asSection(entry.getValue()));
             definition.remove("components_nbt_file");
             definition.remove("blocked_enchants");
+            definition.remove("nbt");
             sanitizedItems.put(entry.getKey(), definition);
         }
         sanitized.put("items", sanitizedItems);
@@ -63,6 +73,11 @@ public final class ItemsAdderLegacyPropertyConverter {
             Object componentsFile = definition.get("components_nbt_file");
             if (componentsFile instanceof String path && !path.isBlank()) {
                 applyComponentsFile(fileName, fullId, path, item);
+            }
+
+            Object directNbt = definition.get("nbt");
+            if (directNbt instanceof String snbt && !snbt.isBlank()) {
+                applyDirectNbt(fullId, snbt, item);
             }
 
             Object blocked = definition.get("blocked_enchants");
@@ -161,13 +176,46 @@ public final class ItemsAdderLegacyPropertyConverter {
         }
     }
 
+    /**
+     * Le contenu OpenMC utilise actuellement le NBT historique uniquement pour
+     * PublicBukkitValues, par exemple :
+     * {PublicBukkitValues:{"openmc:item_id": "ewenite"}}.
+     * On traduit uniquement ce sous-ensemble connu au lieu de prétendre parser
+     * arbitrairement tout le SNBT ItemsAdder.
+     */
+    private void applyDirectNbt(String fullId, String snbt, Map<String, Object> item) {
+        Matcher sectionMatcher = PUBLIC_BUKKIT_VALUES.matcher(snbt);
+        if (!sectionMatcher.find()) {
+            report.unsupported(fullId, "nbt direct hors du sous-ensemble PublicBukkitValues supporté");
+            return;
+        }
+
+        Map<String, Object> values = new LinkedHashMap<>();
+        Matcher entryMatcher = STRING_ENTRY.matcher(sectionMatcher.group(1));
+        while (entryMatcher.find()) {
+            values.put(entryMatcher.group(1), entryMatcher.group(2));
+        }
+
+        if (values.isEmpty()) {
+            report.unsupported(fullId, "nbt PublicBukkitValues sans valeur chaîne convertible");
+            return;
+        }
+
+        mergePublicBukkitValues(item, values);
+
+        String stripped = snbt.replace(sectionMatcher.group(), "").replaceAll("[{}\\s,]", "");
+        if (!stripped.isEmpty()) {
+            report.unsupported(fullId, "nbt direct partiellement converti : données hors PublicBukkitValues restantes");
+        }
+    }
+
     private void applyBlockedEnchants(String fullId, List<?> blocked, Map<String, Object> item) {
         List<String> values = new ArrayList<>();
         for (Object value : blocked) {
-            if (value != null) values.add(String.valueOf(value).trim());
+            if (value != null) values.add(String.valueOf(value).trim().toUpperCase(Locale.ROOT));
         }
 
-        boolean blockAll = values.stream().anyMatch(value -> "ALL".equalsIgnoreCase(value));
+        boolean blockAll = values.stream().anyMatch("ALL"::equalsIgnoreCase);
         if (blockAll) {
             Map<String, Object> data = mutableSection(item.get("data"));
             List<String> removed = stringList(data.get("remove_components"));
@@ -178,11 +226,25 @@ public final class ItemsAdderLegacyPropertyConverter {
 
         List<String> specific = values.stream()
                 .filter(value -> !"ALL".equalsIgnoreCase(value))
+                .distinct()
                 .toList();
         if (!specific.isEmpty()) {
-            report.unsupported(fullId,
-                    "blocked_enchants spécifiques sans équivalent CraftEngine direct : " + String.join(", ", specific));
+            // CraftEngine n'a pas de blacklist d'enchantements par item. On garde
+            // donc la règle dans le PDC Bukkit puis BlockedEnchantListener
+            // l'applique à la table d'enchantement et à l'enclume.
+            mergePublicBukkitValues(item,
+                    Map.of("openmc:blocked_enchants", String.join(",", specific)));
         }
+    }
+
+    private void mergePublicBukkitValues(Map<String, Object> item, Map<String, ?> additions) {
+        Map<String, Object> data = mutableSection(item.get("data"));
+        Map<String, Object> nbt = mutableSection(data.get("nbt"));
+        Map<String, Object> publicValues = mutableSection(nbt.get("PublicBukkitValues"));
+        publicValues.putAll(additions);
+        nbt.put("PublicBukkitValues", publicValues);
+        data.put("nbt", nbt);
+        item.put("data", data);
     }
 
     private String normalizeComponentKey(String key) {

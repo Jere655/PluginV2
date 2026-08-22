@@ -90,6 +90,8 @@ public final class CraftEnginePackGenerator {
                 new ItemsAdderModernContentConverter(namespace, namespaceDir, report);
         ItemsAdderLegacyPropertyConverter legacyPropertyConverter =
                 new ItemsAdderLegacyPropertyConverter(namespace, namespaceDir, report);
+        ItemsAdderIaaRecipeConverter iaaRecipeConverter =
+                new ItemsAdderIaaRecipeConverter(namespace, report);
 
         List<File> configs = new ArrayList<>();
         collectFiles(namespaceDir, ".yml", configs);
@@ -102,20 +104,23 @@ public final class CraftEnginePackGenerator {
             String relative = namespaceDir.toPath().relativize(config.toPath()).toString();
             try {
                 Map<String, Object> legacyCompatible = legacyPropertyConverter.legacyCompatibleContent(content);
-                converter.read(relative, modernConverter.legacyCompatibleContent(legacyCompatible));
+                Map<String, Object> modernCompatible = modernConverter.legacyCompatibleContent(legacyCompatible);
+                converter.read(relative, iaaRecipeConverter.legacyCompatibleContent(modernCompatible));
                 modernConverter.read(relative, content, converter.getItems());
                 legacyPropertyConverter.read(relative, content, converter.getItems());
+                iaaRecipeConverter.read(relative, content);
             } catch (Exception e) {
                 report.unsupported(namespace + "/" + relative, "erreur de conversion : " + e);
             }
         }
 
         copyAssets(namespaceDir, namespace, packDir);
-        writeConfiguration(packDir, namespace, converter, modernConverter);
+        writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter);
     }
 
     private static void writeConfiguration(File packDir, String namespace, ItemsAdderContentConverter converter,
-                                           ItemsAdderModernContentConverter modernConverter) throws IOException {
+                                           ItemsAdderModernContentConverter modernConverter,
+                                           ItemsAdderIaaRecipeConverter iaaRecipeConverter) throws IOException {
         Map<String, Object> configuration = new LinkedHashMap<>();
 
         if (!converter.getItems().isEmpty()) configuration.put("items", converter.getItems());
@@ -125,6 +130,7 @@ public final class CraftEnginePackGenerator {
 
         Map<String, Object> allRecipes = new LinkedHashMap<>(converter.getRecipes());
         allRecipes.putAll(modernConverter.getRecipes());
+        allRecipes.putAll(iaaRecipeConverter.getRecipes());
         if (!allRecipes.isEmpty()) configuration.put("recipes", allRecipes);
 
         if (configuration.isEmpty()) return;

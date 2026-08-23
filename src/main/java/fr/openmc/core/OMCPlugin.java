@@ -2,6 +2,7 @@ package fr.openmc.core;
 
 import com.j256.ormlite.logger.LoggerFactory;
 import fr.openmc.api.cooldown.DynamicCooldownManager;
+import fr.openmc.api.datapacks.OMCDatapack;
 import fr.openmc.api.menulib.MenuLib;
 import fr.openmc.api.packetmenulib.PacketMenuLib;
 import fr.openmc.core.bootstrap.features.Feature;
@@ -188,7 +189,7 @@ public class OMCPlugin extends JavaPlugin {
 
         OMCLogger.logLoadMessage(this);
         if (!OMCPlugin.isUnitTestVersion()) {
-            Datapack pack = this.getServer().getDatapackManager().getPack(getPluginMeta().getName() + "/omc");
+            Datapack pack = this.getServer().getDatapackManager().getPack(OMCDatapack.ID_DATAPACK_INJECTED);
             if (pack != null) {
                 if (pack.isEnabled()) {
                     OMCLogger.successFormatted("Lancement du datapack réussi");

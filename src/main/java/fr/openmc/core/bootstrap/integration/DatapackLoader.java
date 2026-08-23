@@ -1,6 +1,7 @@
 package fr.openmc.core.bootstrap.integration;
 
 import fr.openmc.core.utils.FilesUtils;
+import fr.openmc.core.bootstrap.integration.OMCLogger;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 
@@ -22,6 +23,7 @@ public class DatapackLoader {
                     context.getLifecycleManager().registerEventHandler(LifecycleEvents.DATAPACK_DISCOVERY.newHandler(
                     event -> {
                         try {
+                            OMCLogger.debug("Registering OpenMC datapack: " + pathDir.getFileName().toString() + " from " + pathDir.toUri());
                             event.registrar().discoverPack(pathDir.toUri(), pathDir.getFileName().toString());
                         } catch (IOException e) {
                             throw new RuntimeException(e);

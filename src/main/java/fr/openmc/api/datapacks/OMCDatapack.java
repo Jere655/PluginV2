@@ -2,6 +2,7 @@ package fr.openmc.api.datapacks;
 
 import fr.openmc.api.datapacks.injectors.PackMetadataInjector;
 import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.utils.FilesUtils;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -22,7 +23,7 @@ public class OMCDatapack {
     private final String namespace;
     private final Set<DatapackInjector> injectors = new HashSet<>();
 
-    public final String ID_DATAPACK_INJECTED = "openmc-injected";
+    public static final String ID_DATAPACK_INJECTED = "openmc-injected";
     private final String ID_TEMP_DATAPACK_FOLDER = "datapacks-openmc";
 
     public OMCDatapack(String packName, String namespace) {
@@ -53,6 +54,7 @@ public class OMCDatapack {
                     try {
                         URI uri = dir.toUri();
 
+                        OMCLogger.debug("Registering OpenMC datapack: " + ID_DATAPACK_INJECTED + " from " + uri);
                         event.registrar().discoverPack(uri, ID_DATAPACK_INJECTED);
                     } catch (IOException e) {
                         throw new RuntimeException(e);

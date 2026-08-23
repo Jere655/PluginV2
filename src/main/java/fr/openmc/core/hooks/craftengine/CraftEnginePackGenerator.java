@@ -18,6 +18,8 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 /**
@@ -134,6 +136,15 @@ public final class CraftEnginePackGenerator {
                 report.unsupported(namespace + "/" + relative, "erreur de conversion : " + e);
             }
         }
+
+        Set<String> allItemIds = new TreeSet<>();
+        allItemIds.addAll(report.getItemIDs());
+        allItemIds.addAll(report.getBlockIDs());
+        allItemIds.addAll(report.getFurnitureIDs());
+        allItemIds.addAll(report.getEquipmentIDs());
+        allItemIds.addAll(report.getEquipmentItemIDs());
+        allItemIds.addAll(report.getConsumableIDs());
+        categoryConverter.expandWildcards(allItemIds);
 
         copyAssets(namespaceDir, namespace, packDir);
         writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter, categoryConverter,

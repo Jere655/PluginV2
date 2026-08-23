@@ -102,7 +102,7 @@ public class ItemsAdderContentConverter {
         Map<String, Object> data = itemData(definition);
         if (!data.isEmpty()) item.put("data", data);
 
-        ModelReference model = resolveModel(fullId, id, resource, graphics, !blockDefinition.isEmpty());
+        ModelReference model = resolveModel(fullId, id, resource, graphics, !blockDefinition.isEmpty(), definition);
         model.applyToItem(item);
 
         if (!blockDefinition.isEmpty()) {
@@ -438,10 +438,17 @@ public class ItemsAdderContentConverter {
     }
 
     private ModelReference resolveModel(String fullId, String id, Map<String, Object> resource,
-                                        Map<String, Object> graphics, boolean isBlock) {
+                                        Map<String, Object> graphics, boolean isBlock,
+                                        Map<String, Object> definition) {
         Map<String, Object> faces = asSection(graphics.get("textures"));
         if (!faces.isEmpty()) {
             return cubeModel(fullId, id, faces);
+        }
+
+        Object singleTexture = graphics.get("texture");
+        if (singleTexture instanceof String texture && !texture.isBlank()) {
+            if (!isQualified(texture) && !hasTexture(texture)) report.missingAsset(fullId, "textures/" + texture);
+            return ModelReference.texture(qualify(stripExtension(texture)));
         }
 
         Object modelPath = resource.get("model_path");
@@ -467,7 +474,20 @@ public class ItemsAdderContentConverter {
             return ModelReference.generated(namespace + ":item/" + id, "minecraft:item/generated", layers);
         }
 
-        if (!isBlock) report.missingAsset(fullId, "aucune texture ni modèle défini");
+        Object resourceTexture = resource.get("texture");
+        if (resourceTexture instanceof String texture && !texture.isBlank()) {
+            if (!isQualified(texture) && !hasTexture(texture)) report.missingAsset(fullId, "textures/" + texture);
+            return ModelReference.texture(qualify(stripExtension(texture)));
+        }
+
+        if (!isBlock) {
+            boolean hasEquipment = definition.containsKey("equipment");
+            boolean hasHeadNbt = definition.containsKey("components_nbt_file")
+                    && "PLAYER_HEAD".equalsIgnoreCase(String.valueOf(resource.getOrDefault("material", "")));
+            if (!hasEquipment && !hasHeadNbt) {
+                report.missingAsset(fullId, "aucune texture ni modèle défini");
+            }
+        }
         return ModelReference.none();
     }
 

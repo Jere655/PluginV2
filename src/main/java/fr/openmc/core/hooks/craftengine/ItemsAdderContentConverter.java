@@ -23,7 +23,7 @@ public class ItemsAdderContentConverter {
     );
     private static final Set<String> UNSUPPORTED_ITEM_FIELDS = Set.of(
             "equipment", "consumable", "attribute_modifiers", "components_nbt_file",
-            "blocked_enchants", "enchants", "nbt"
+            "blocked_enchants", "enchants"
     );
 
     private final String namespace;

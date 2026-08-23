@@ -61,6 +61,10 @@ public class ItemsAdderContentConverter {
                 case "items" -> readItems(asSection(entry.getValue()));
                 case "font_images" -> readFontImages(asSection(entry.getValue()));
                 case "recipes" -> readRecipes(asSection(entry.getValue()));
+                case "entities" -> report.unsupported(namespace + "/" + fileName + " [" + section + "]",
+                        "entité ItemsAdder sans équivalent CraftEngine, aucun usage Java OpenMC détecté");
+                case "scripts" -> report.unsupported(namespace + "/" + fileName + " [" + section + "]",
+                        "script ItemsAdder sans équivalent CraftEngine, aucun usage Java OpenMC détecté");
                 default -> {
                     if (UNSUPPORTED_SECTIONS.contains(section)) {
                         report.unsupported(namespace + "/" + fileName + " [" + section + "]",

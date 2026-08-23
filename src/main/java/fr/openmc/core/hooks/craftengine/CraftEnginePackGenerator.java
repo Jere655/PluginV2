@@ -94,6 +94,14 @@ public final class CraftEnginePackGenerator {
                 new ItemsAdderIaaRecipeConverter(namespace, report);
         ItemsAdderCategoryConverter categoryConverter =
                 new ItemsAdderCategoryConverter(namespace, report);
+        ItemsAdderCropConverter cropConverter =
+                new ItemsAdderCropConverter(namespace, namespaceDir, report);
+        ItemsAdderLootConverter lootConverter =
+                new ItemsAdderLootConverter(namespace, report);
+        ItemsAdderWorldgenConverter worldgenConverter =
+                new ItemsAdderWorldgenConverter(namespace, report);
+        ItemsAdderSoundConverter soundConverter =
+                new ItemsAdderSoundConverter(namespace, namespaceDir, report);
 
         List<File> configs = new ArrayList<>();
         collectFiles(namespaceDir, ".yml", configs);
@@ -108,36 +116,57 @@ public final class CraftEnginePackGenerator {
                 Map<String, Object> legacyCompatible = legacyPropertyConverter.legacyCompatibleContent(content);
                 Map<String, Object> modernCompatible = modernConverter.legacyCompatibleContent(legacyCompatible);
                 Map<String, Object> iaaCompatible = iaaRecipeConverter.legacyCompatibleContent(modernCompatible);
-                converter.read(relative, categoryConverter.legacyCompatibleContent(iaaCompatible));
+                Map<String, Object> categoryCompatible = categoryConverter.legacyCompatibleContent(iaaCompatible);
+                Map<String, Object> cropCompatible = cropConverter.legacyCompatibleContent(categoryCompatible);
+                Map<String, Object> lootCompatible = lootConverter.legacyCompatibleContent(cropCompatible);
+                Map<String, Object> worldgenCompatible = worldgenConverter.legacyCompatibleContent(lootCompatible);
+                Map<String, Object> soundCompatible = soundConverter.legacyCompatibleContent(worldgenCompatible);
+                converter.read(relative, soundCompatible);
                 modernConverter.read(relative, content, converter.getItems());
                 legacyPropertyConverter.read(relative, content, converter.getItems());
                 iaaRecipeConverter.read(relative, content);
                 categoryConverter.read(relative, content);
+                cropConverter.read(relative, content);
+                lootConverter.read(relative, content);
+                worldgenConverter.read(relative, content);
+                soundConverter.read(relative, content);
             } catch (Exception e) {
                 report.unsupported(namespace + "/" + relative, "erreur de conversion : " + e);
             }
         }
 
         copyAssets(namespaceDir, namespace, packDir);
-        writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter, categoryConverter);
+        writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter, categoryConverter,
+                cropConverter, lootConverter, worldgenConverter, soundConverter);
     }
 
     private static void writeConfiguration(File packDir, String namespace, ItemsAdderContentConverter converter,
                                            ItemsAdderModernContentConverter modernConverter,
                                            ItemsAdderIaaRecipeConverter iaaRecipeConverter,
-                                           ItemsAdderCategoryConverter categoryConverter) throws IOException {
+                                           ItemsAdderCategoryConverter categoryConverter,
+                                           ItemsAdderCropConverter cropConverter,
+                                           ItemsAdderLootConverter lootConverter,
+                                           ItemsAdderWorldgenConverter worldgenConverter,
+                                           ItemsAdderSoundConverter soundConverter) throws IOException {
         Map<String, Object> configuration = new LinkedHashMap<>();
 
         if (!converter.getItems().isEmpty()) configuration.put("items", converter.getItems());
-        if (!converter.getBlocks().isEmpty()) configuration.put("blocks", converter.getBlocks());
         if (!modernConverter.getEquipments().isEmpty()) configuration.put("equipments", modernConverter.getEquipments());
         if (!converter.getImages().isEmpty()) configuration.put("images", converter.getImages());
         if (!categoryConverter.getCategories().isEmpty()) configuration.put("categories", categoryConverter.getCategories());
+
+        Map<String, Object> allBlocks = new LinkedHashMap<>(converter.getBlocks());
+        allBlocks.putAll(cropConverter.getCrops());
+        if (!allBlocks.isEmpty()) configuration.put("blocks", allBlocks);
 
         Map<String, Object> allRecipes = new LinkedHashMap<>(converter.getRecipes());
         allRecipes.putAll(modernConverter.getRecipes());
         allRecipes.putAll(iaaRecipeConverter.getRecipes());
         if (!allRecipes.isEmpty()) configuration.put("recipes", allRecipes);
+
+        if (!lootConverter.getLootSources().isEmpty()) configuration.put("loot_sources", lootConverter.getLootSources());
+        if (!worldgenConverter.getPlacedFeatures().isEmpty()) configuration.put("placed_features", worldgenConverter.getPlacedFeatures());
+        if (!soundConverter.getSounds().isEmpty()) configuration.put("sounds", soundConverter.getSounds());
 
         if (configuration.isEmpty()) return;
 

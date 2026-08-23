@@ -35,6 +35,12 @@ public class ConversionReport {
     private final Set<String> equipmentItemIDs = new TreeSet<>();
     @Getter
     private final Set<String> consumableIDs = new TreeSet<>();
+    @Getter
+    private final Set<String> lootSourceIDs = new TreeSet<>();
+    @Getter
+    private final Set<String> worldgenIDs = new TreeSet<>();
+    @Getter
+    private final Set<String> soundIDs = new TreeSet<>();
 
     private final List<String> unsupported = new ArrayList<>();
     private final List<String> missingAssets = new ArrayList<>();
@@ -56,9 +62,10 @@ public class ConversionReport {
     }
 
     public String summary() {
-        return "items=%d, blocs=%d, furniture=%d, images=%d, recettes=%d, équipements=%d, items équipés=%d, consommables=%d, non supportés=%d, assets manquants=%d"
+        return "items=%d, blocs=%d, furniture=%d, images=%d, recettes=%d, équipements=%d, items équipés=%d, consommables=%d, loots=%d, worldgen=%d, sons=%d, non supportés=%d, assets manquants=%d"
                 .formatted(itemIDs.size(), blockIDs.size(), furnitureIDs.size(), imageIDs.size(),
                         recipeIDs.size(), equipmentIDs.size(), equipmentItemIDs.size(), consumableIDs.size(),
+                        lootSourceIDs.size(), worldgenIDs.size(), soundIDs.size(),
                         unsupported.size(), missingAssets.size());
     }
 
@@ -74,12 +81,18 @@ public class ConversionReport {
         builder.append("équipements convertis : ").append(equipmentIDs.size()).append('\n');
         builder.append("items équipés         : ").append(equipmentItemIDs.size()).append('\n');
         builder.append("consommables convertis: ").append(consumableIDs.size()).append('\n');
+        builder.append("loots convertis       : ").append(lootSourceIDs.size()).append('\n');
+        builder.append("worldgen convertis    : ").append(worldgenIDs.size()).append('\n');
+        builder.append("sons convertis        : ").append(soundIDs.size()).append('\n');
 
         appendSection(builder, "Entrées non supportées (à porter manuellement)", unsupported);
         appendSection(builder, "Textures / modèles manquants", missingAssets);
         appendSection(builder, "Équipements", new ArrayList<>(equipmentIDs));
         appendSection(builder, "Items équipés", new ArrayList<>(equipmentItemIDs));
         appendSection(builder, "Consommables", new ArrayList<>(consumableIDs));
+        appendSection(builder, "Loots", new ArrayList<>(lootSourceIDs));
+        appendSection(builder, "Worldgen", new ArrayList<>(worldgenIDs));
+        appendSection(builder, "Sons", new ArrayList<>(soundIDs));
         appendSection(builder, "Blocs", new ArrayList<>(blockIDs));
         appendSection(builder, "Furniture", new ArrayList<>(furnitureIDs));
         appendSection(builder, "Items", new ArrayList<>(itemIDs));

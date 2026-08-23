@@ -18,8 +18,8 @@ import java.util.Set;
 public class ItemsAdderContentConverter {
     private static final Set<String> IGNORED_SECTIONS = Set.of("info", "minecraft_lang_overwrite");
     private static final Set<String> UNSUPPORTED_SECTIONS = Set.of(
-            "categories", "equipments", "emotes", "entities", "crops", "loots",
-            "scripts", "sounds", "worlds_populators", "legacy_armor_renderings"
+            "categories", "equipments", "emotes", "entities",
+            "scripts", "legacy_armor_renderings"
     );
     private static final Set<String> UNSUPPORTED_ITEM_FIELDS = Set.of(
             "equipment", "consumable", "attribute_modifiers", "components_nbt_file",

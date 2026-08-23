@@ -18,6 +18,7 @@ public final class ItemsAdderModernContentConverter {
     private final ConversionReport report;
     private final Map<String, Object> equipments = new LinkedHashMap<>();
     private final Map<String, Object> recipes = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Map<String, Object>> legacyArmorRenderings = new LinkedHashMap<>();
 
     public ItemsAdderModernContentConverter(String namespace, File namespaceDir, ConversionReport report) {
         this.namespace = namespace;
@@ -40,6 +41,7 @@ public final class ItemsAdderModernContentConverter {
     public Map<String, Object> legacyCompatibleContent(Map<String, Object> content) {
         Map<String, Object> sanitized = new LinkedHashMap<>(content);
         sanitized.remove("equipments");
+        sanitized.remove("legacy_armor_renderings");
 
         Map<String, Object> items = asSection(content.get("items"));
         if (!items.isEmpty()) {
@@ -67,6 +69,13 @@ public final class ItemsAdderModernContentConverter {
     }
 
     public void read(String fileName, Map<String, Object> content, Map<String, Object> convertedItems) {
+        legacyArmorRenderings.clear();
+        Map<String, Object> shaders = asSection(content.get("legacy_armor_renderings"));
+        if (!shaders.isEmpty()) {
+            for (Map.Entry<String, Object> entry : shaders.entrySet()) {
+                legacyArmorRenderings.put(qualifyId(entry.getKey()), asSection(entry.getValue()));
+            }
+        }
         readEquipments(fileName, asSection(content.get("equipments")));
         readItemProperties(asSection(content.get("items")), convertedItems);
         readRecipes(fileName, asSection(content.get("recipes")));
@@ -141,6 +150,7 @@ public final class ItemsAdderModernContentConverter {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void applyEquipment(String fullId, Map<String, Object> itemDefinition,
                                 Map<String, Object> source, Map<String, Object> item) {
         String slot = inferSlot(itemDefinition, source);
@@ -153,6 +163,19 @@ public final class ItemsAdderModernContentConverter {
             if (slot != null) target.put("slot", slot);
             settings.put("equipment", target);
             item.put("settings", settings);
+
+            Object legacyRenderingId = source.get("legacy_armor_rendering_id");
+            if (legacyRenderingId instanceof String shaderId && !shaderId.isBlank()) {
+                Map<String, Object> shader = legacyArmorRenderings.get(qualifyId(shaderId));
+                if (shader != null && shader.get("color") instanceof String color && !color.isBlank()) {
+                    Map<String, Object> equipmentEntry = (Map<String, Object>) equipments.get(qualifyId(id));
+                    if (equipmentEntry != null) {
+                        Map<String, Object> dyeable = new LinkedHashMap<>();
+                        dyeable.put("color_when_undyed", "#" + color);
+                        equipmentEntry.put("dyeable", dyeable);
+                    }
+                }
+            }
         } else if (slot != null) {
             Map<String, Object> data = mutableSection(item.get("data"));
             data.put("equippable", Map.of("slot", slot));

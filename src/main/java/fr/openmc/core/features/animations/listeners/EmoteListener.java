@@ -16,11 +16,15 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
+import java.util.logging.Level;
 
 public class EmoteListener implements Listener, NotLoadInUnitTest {
     public static final HashMap<Player, PlayerAnimationInfo> playingAnimations = new HashMap<>();
@@ -30,15 +34,28 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
         Animation animation = EnumUtils.match(e.getEmoteName(), Animation.class);
         if (animation == null) return;
 
-        Player player = e.getPlayer();
+        play(e.getPlayer(), animation);
+    }
+
+    @EventHandler
+    public void onAnimationEndOrStop(PlayerEmoteEndEvent e) {
+        Animation animation = EnumUtils.match(e.getEmoteName(), Animation.class);
+        if (animation == null) return;
+
+        stop(e.getPlayer());
+    }
+
+    public static void play(Player player, Animation animation) {
         Location base = player.getLocation();
 
         if (animation.getSoundName() != null) {
             player.playSound(player, animation.getSoundName(), 1.0f, 1.0f);
         }
 
+        PlayerAnimationInfo info = new PlayerAnimationInfo();
+        info.setAnimation(animation);
+        playingAnimations.put(player, info);
 
-        playingAnimations.put(player, new PlayerAnimationInfo());
         EmoteListener.setupHead(player);
 
         ArmorStand stand = player.getWorld().spawn(base, ArmorStand.class, as -> {
@@ -46,8 +63,14 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
             as.setGravity(false);
             as.setMarker(true);
         });
+        info.setArmorStand(stand);
 
-        playingAnimations.get(player).setArmorStand(stand);
+        if (animation == Animation.JOIN_RIFT) {
+            info.setOldWalkSpeed(player.getWalkSpeed());
+            info.setOldFlySpeed(player.getFlySpeed());
+            player.setWalkSpeed(0f);
+            player.setFlySpeed(0f);
+        }
 
         BukkitTask task = new BukkitRunnable() {
             int tick = 0;
@@ -55,7 +78,12 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
             @Override
             public void run() {
                 if (tick > animation.getTotalTicks()) {
-                    animationEnd(player);
+                    stop(player);
+                    return;
+                }
+
+                if (animation == Animation.JOIN_RIFT && !player.isOnGround()) {
+                    stop(player);
                     return;
                 }
 
@@ -68,7 +96,7 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
                     Vector lookTarget = camLoc.toVector().add(new Vector(view.getX(), 0, view.getZ()));
 
                     Vector diff = lookTarget.clone().subtract(camLoc.toVector());
-                    if (diff.lengthSquared() < 1e-6) { // obligé pour éviter une java.lang.IllegalArgumentException: pitch not finite
+                    if (diff.lengthSquared() < 1e-6) {
                         diff = new Vector(0, 0, 1);
                     }
                     Vector direction = diff.normalize();
@@ -82,22 +110,19 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
             }
         }.runTaskTimer(OMCPlugin.getInstance(), 0L, 1L);
 
-        playingAnimations.get(player).setTask(task);
+        info.setTask(task);
     }
 
-    @EventHandler
-    public void onAnimationEndOrStop(PlayerEmoteEndEvent e) {
-        Animation animation = EnumUtils.match(e.getEmoteName(), Animation.class);
-        if (animation == null) return;
-
-        animationEnd(e.getPlayer());
-    }
-
-    private void animationEnd(Player player) {
+    public static void stop(Player player) {
         PlayerAnimationInfo info = playingAnimations.remove(player);
         if (info == null) return;
 
         player.setInvulnerable(false);
+
+        if (info.getAnimation() == Animation.JOIN_RIFT) {
+            player.setWalkSpeed(info.getOldWalkSpeed());
+            player.setFlySpeed(info.getOldFlySpeed());
+        }
 
         sendCamera(player, player);
         if (info.getArmorStand() != null)
@@ -107,6 +132,33 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
             info.getTask().cancel();
 
         restoreHead(player);
+    }
+
+    @EventHandler
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+        if (!event.isSneaking()) return;
+        PlayerAnimationInfo info = playingAnimations.get(event.getPlayer());
+        if (info != null && info.getAnimation() == Animation.JOIN_RIFT) {
+            stop(event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        PlayerAnimationInfo info = playingAnimations.get(player);
+        if (info != null && info.getAnimation() == Animation.JOIN_RIFT) {
+            stop(player);
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player player)) return;
+        PlayerAnimationInfo info = playingAnimations.get(player);
+        if (info != null && info.getAnimation() == Animation.JOIN_RIFT) {
+            stop(player);
+        }
     }
 
     /**
@@ -133,7 +185,7 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
         player.teleport(loc);
     }
 
-    private void restoreHead(Player player) {
+    private static void restoreHead(Player player) {
         PlayerAnimationInfo info = playingAnimations.get(player);
         if (info == null) return;
 

@@ -12,4 +12,7 @@ public class PlayerAnimationInfo {
     private BukkitTask task;
     private ArmorStand armorStand;
     private Float[] oldRotations;
+    private Animation animation;
+    private float oldWalkSpeed;
+    private float oldFlySpeed;
 }

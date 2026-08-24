@@ -109,7 +109,7 @@ public final class ItemsAdderWorldgenConverter {
         return target;
     }
 
-    private Map<String, Object> orePlacement(int minHeight, int maxHeight, int chunkVeins) {
+    private List<Map<String, Object>> orePlacement(int minHeight, int maxHeight, int chunkVeins) {
         List<Map<String, Object>> placement = new java.util.ArrayList<>();
 
         placement.add(Map.of("type", "minecraft:count", "count", chunkVeins));
@@ -125,7 +125,7 @@ public final class ItemsAdderWorldgenConverter {
         heightPlacement.put("height", heightRange);
         placement.add(heightPlacement);
 
-        return Map.of("placement", placement);
+        return placement;
     }
 
     private String replaceableTag(String replaceable) {

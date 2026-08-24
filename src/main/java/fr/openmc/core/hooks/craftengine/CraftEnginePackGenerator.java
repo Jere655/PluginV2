@@ -146,7 +146,7 @@ public final class CraftEnginePackGenerator {
         allItemIds.addAll(report.getConsumableIDs());
         categoryConverter.expandWildcards(allItemIds);
 
-        copyAssets(namespaceDir, namespace, packDir);
+        copyAssets(namespaceDir, namespace, packDir, converter.getItemTextureRelPaths());
         writeConfiguration(packDir, namespace, converter, modernConverter, iaaRecipeConverter, categoryConverter,
                 cropConverter, lootConverter, worldgenConverter, soundConverter);
     }
@@ -191,7 +191,8 @@ public final class CraftEnginePackGenerator {
         }
     }
 
-    private static void copyAssets(File namespaceDir, String namespace, File packDir) throws IOException {
+    private static void copyAssets(File namespaceDir, String namespace, File packDir,
+                                   Set<String> itemTextureRelPaths) throws IOException {
         Path assetsDir = packDir.toPath().resolve("resourcepack/assets");
 
         for (String folder : List.of("textures", "models", "sounds")) {
@@ -199,6 +200,15 @@ public final class CraftEnginePackGenerator {
             if (source.isDirectory()) {
                 copyDirectory(source.toPath(), assetsDir.resolve(namespace).resolve(folder));
             }
+        }
+
+        Path itemAtlasDir = assetsDir.resolve(namespace).resolve("textures/item");
+        for (String relPath : itemTextureRelPaths) {
+            Path source = namespaceDir.toPath().resolve("textures").resolve(relPath);
+            if (!Files.isRegularFile(source)) continue;
+            Path target = itemAtlasDir.resolve(relPath);
+            Files.createDirectories(target.getParent());
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
         }
 
         File resourcepack = new File(namespaceDir, "resourcepack");

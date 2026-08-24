@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,6 +39,8 @@ public class ItemsAdderContentConverter {
     private final Map<String, Object> images = new LinkedHashMap<>();
     @Getter
     private final Map<String, Object> recipes = new LinkedHashMap<>();
+    @Getter
+    private final Set<String> itemTextureRelPaths = new LinkedHashSet<>();
 
     public ItemsAdderContentConverter(String namespace, File namespaceDir, ConversionReport report) {
         this.namespace = namespace;
@@ -452,7 +455,8 @@ public class ItemsAdderContentConverter {
         Object singleTexture = graphics.get("texture");
         if (singleTexture instanceof String texture && !texture.isBlank()) {
             if (!isQualified(texture) && !hasTexture(texture)) report.missingAsset(fullId, "textures/" + texture);
-            return ModelReference.texture(qualify(stripExtension(texture)));
+            String ref = isBlock ? qualify(stripExtension(texture)) : qualifyItemTexture(texture);
+            return ModelReference.texture(ref);
         }
 
         Object modelPath = resource.get("model_path");
@@ -468,12 +472,12 @@ public class ItemsAdderContentConverter {
             }
 
             if (textures.size() == 1) {
-                return ModelReference.texture(qualify(stripExtension(textures.getFirst())));
+                return ModelReference.texture(qualifyItemTexture(textures.getFirst()));
             }
 
             Map<String, Object> layers = new LinkedHashMap<>();
             for (int index = 0; index < textures.size(); index++) {
-                layers.put("layer" + index, qualify(stripExtension(textures.get(index))));
+                layers.put("layer" + index, qualifyItemTexture(textures.get(index)));
             }
             return ModelReference.generated(namespace + ":item/" + id, "minecraft:item/generated", layers);
         }
@@ -481,7 +485,7 @@ public class ItemsAdderContentConverter {
         Object resourceTexture = resource.get("texture");
         if (resourceTexture instanceof String texture && !texture.isBlank()) {
             if (!isQualified(texture) && !hasTexture(texture)) report.missingAsset(fullId, "textures/" + texture);
-            return ModelReference.texture(qualify(stripExtension(texture)));
+            return ModelReference.texture(qualifyItemTexture(texture));
         }
 
         if (!isBlock) {
@@ -600,6 +604,21 @@ public class ItemsAdderContentConverter {
      */
     private String qualify(String path) {
         return isQualified(path) ? path : namespace + ":" + path;
+    }
+
+    private String qualifyItemTexture(String path) {
+        String withoutExt = stripExtension(path);
+        if (isQualified(withoutExt)) return withoutExt;
+
+        String lower = withoutExt.toLowerCase();
+        if (lower.startsWith("item/") || lower.startsWith("block/") || lower.startsWith("blocks/")
+                || lower.startsWith("armor/") || lower.startsWith("entity/")) {
+            return qualify(withoutExt);
+        }
+
+        String relPath = withoutExt + ".png";
+        itemTextureRelPaths.add(relPath);
+        return qualify("item/" + withoutExt);
     }
 
     private boolean isQualified(String path) {

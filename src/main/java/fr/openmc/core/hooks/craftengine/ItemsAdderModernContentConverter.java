@@ -378,11 +378,42 @@ public final class ItemsAdderModernContentConverter {
         }
 
         Map<String, Object> resource = asSection(definition.get("resource"));
-        String material = String.valueOf(resource.getOrDefault("material", "")).toLowerCase(Locale.ROOT);
+        String material = materialName(resource, definition);
         if (material.endsWith("_helmet") || material.equals("carved_pumpkin") || material.equals("player_head")) return "head";
         if (material.endsWith("_chestplate") || material.equals("elytra")) return "chest";
         if (material.endsWith("_leggings")) return "legs";
         if (material.endsWith("_boots")) return "feet";
+        return null;
+    }
+
+    private String materialName(Map<String, Object> resource, Map<String, Object> definition) {
+        Object material = resource.get("material");
+        if (material == null || (material instanceof String s && s.isBlank())) {
+            material = definition.get("material");
+        }
+        if (material instanceof String name && !name.isBlank()) {
+            return name.toLowerCase(Locale.ROOT).replace("minecraft:", "");
+        }
+        if (material instanceof Map<?, ?> map) {
+            Object inner = map.get("dream_item_material");
+            if (!(inner instanceof String s) || s.isBlank()) {
+                inner = recoverDreamMaterial(map);
+            }
+            if (inner instanceof String s && !s.isBlank()) {
+                return s.toLowerCase(Locale.ROOT).replace("minecraft:", "");
+            }
+        }
+        return "";
+    }
+
+    private static String recoverDreamMaterial(Map<?, ?> map) {
+        for (Object key : map.keySet()) {
+            String k = String.valueOf(key);
+            int idx = k.indexOf(':');
+            if (idx > 0 && k.substring(0, idx).trim().equalsIgnoreCase("dream_item_material")) {
+                return k.substring(idx + 1).trim();
+            }
+        }
         return null;
     }
 

@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public final class ItemsAdderLegacyPropertyConverter {
     private static final Pattern PUBLIC_BUKKIT_VALUES = Pattern.compile(
-            "PublicBukkitValues\\s*:\\s*\\{(.*?)}", Pattern.DOTALL);
+            "[\"']?PublicBukkitValues[\"']?\\s*:\\s*\\{(.*?)\\}", Pattern.DOTALL);
     private static final Pattern STRING_ENTRY = Pattern.compile(
             "[\\\"']?([a-zA-Z0-9_.:-]+)[\\\"']?\\s*:\\s*[\\\"']([^\\\"']*)[\\\"']");
 

@@ -1,7 +1,6 @@
 package fr.openmc.core.features.mainmenu.menus;
 
 import dev.lone.itemsadder.api.CustomStack;
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.entity.player.OMCPlayer;
 import fr.openmc.api.packetmenulib.PacketMenuLib;
 import fr.openmc.api.packetmenulib.events.InventoryClickEvent;
@@ -79,12 +78,12 @@ public class Page1 implements Menu {
         });
 
         if (playerCity != null) {
-            title = Component.text(FontImageWrapper.replaceFontImages(":offset_-26::omc_main_menu_page_1:"));
+            title = Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":offset_-26::omc_main_menu_page_1:"));
             Component cityName = Component.text(playerCity.getName()).color(NamedTextColor.YELLOW);
             cityItem.editMeta(meta -> meta.itemName(TranslationManager.translation("feature.mainmenu.item.city.name", cityName)
                     .color(NamedTextColor.YELLOW)));
         } else {
-            title = Component.text(FontImageWrapper.replaceFontImages(":offset_-26::omc_main_menu_page_1_sans_ville:"));
+            title = Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":offset_-26::omc_main_menu_page_1_sans_ville:"));
             cityItem.editMeta(meta -> meta.itemName(TranslationManager.translation("feature.mainmenu.item.city.no_city")
                     .color(NamedTextColor.GRAY)));
         }

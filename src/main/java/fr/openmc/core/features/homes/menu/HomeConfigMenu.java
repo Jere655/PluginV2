@@ -1,6 +1,5 @@
 package fr.openmc.core.features.homes.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.entity.player.OMCPlayer;
 import fr.openmc.api.input.dialog.DialogInput;
 import fr.openmc.api.menulib.Menu;
@@ -43,7 +42,7 @@ public class HomeConfigMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-8::omc_homes_menus_home_settings:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-8::omc_homes_menus_home_settings:");
     }
 
     @Override

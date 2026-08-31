@@ -1,6 +1,5 @@
 package fr.openmc.core.features.mailboxes.menu.letter;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.template.ItemMenuTemplate;
 import fr.openmc.api.menulib.utils.InventorySize;
@@ -49,7 +48,7 @@ public class LetterMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§f§r:offset_-8::letter_mailbox:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§f§r:offset_-8::letter_mailbox:");
     }
 
     public LetterMenu(Player player, Letter letter) {

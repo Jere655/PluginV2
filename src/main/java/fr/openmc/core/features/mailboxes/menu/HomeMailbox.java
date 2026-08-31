@@ -1,6 +1,5 @@
 package fr.openmc.core.features.mailboxes.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemMenuBuilder;
@@ -29,7 +28,7 @@ public class HomeMailbox extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§f§r:offset_-8::home_mailbox:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§f§r:offset_-8::home_mailbox:");
     }
     
     public HomeMailbox(Player player) {

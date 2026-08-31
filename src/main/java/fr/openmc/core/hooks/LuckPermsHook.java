@@ -1,6 +1,5 @@
 package fr.openmc.core.hooks;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.core.bootstrap.hooks.ApiHook;
 import fr.openmc.core.bootstrap.hooks.Hooks;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
@@ -60,7 +59,7 @@ public class LuckPermsHook extends Hooks implements ApiHook<LuckPerms> {
         String formattedPrefix = prefix.replace("&", "§");
 
         if (ItemsAdderHook.isEnable()) {
-            return FontImageWrapper.replaceFontImages(formattedPrefix);
+            return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(formattedPrefix);
         }
         return formattedPrefix;
     }
@@ -73,7 +72,7 @@ public class LuckPermsHook extends Hooks implements ApiHook<LuckPerms> {
 
         String formattedPrefix = prefix.replace("&", "§");
 
-        String finalPrefix = ItemsAdderHook.isEnable() ? FontImageWrapper.replaceFontImages(formattedPrefix) : formattedPrefix;
+        String finalPrefix = ItemsAdderHook.isEnable() ? fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(formattedPrefix) : formattedPrefix;
 
         return LegacyComponentSerializer.legacySection().deserialize(finalPrefix);
     }

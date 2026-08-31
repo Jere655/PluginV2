@@ -4,7 +4,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.annotations.Credit;
@@ -128,7 +127,7 @@ public class BitsManager extends Feature implements HasDatabase, HasCommands {
 
     public static String getBitsIcon() {
         if (ItemsAdderHook.isEnable()) {
-            return FontImageWrapper.replaceFontImages("§f:bits:");
+            return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§f:bits:");
         } else {
             return "✯";
         }

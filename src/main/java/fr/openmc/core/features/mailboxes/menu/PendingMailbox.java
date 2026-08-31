@@ -1,6 +1,5 @@
 package fr.openmc.core.features.mailboxes.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.template.ItemMenuTemplate;
 import fr.openmc.api.menulib.utils.InventorySize;
@@ -44,7 +43,7 @@ public class PendingMailbox extends PaginatedMenu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§f§r:offset_-8::player_mailbox:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§f§r:offset_-8::player_mailbox:");
     }
 
     @Override

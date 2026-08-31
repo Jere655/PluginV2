@@ -1,6 +1,5 @@
 package fr.openmc.api.menulib.template;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemMenuBuilder;
@@ -78,7 +77,7 @@ public class ConfirmMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return texture == null ? FontImageWrapper.replaceFontImages("§r§f:offset_-8::confirm_menu:") : texture;
+        return texture == null ? fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-8::confirm_menu:") : texture;
     }
 
     @Override

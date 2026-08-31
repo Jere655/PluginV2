@@ -1,6 +1,5 @@
 package fr.openmc.core.features.events.contents.weeklyevents.contents.contest.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemMenuBuilder;
@@ -42,7 +41,7 @@ public class TradeMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-48::contest_menu:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-48::contest_menu:");
     }
 
     @Override

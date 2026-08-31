@@ -1,6 +1,5 @@
 package fr.openmc.core.features.displays.scoreboards.sb;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.scoreboard.SternalBoard;
 import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
@@ -166,7 +165,7 @@ public class CityWarScoreboard extends BaseScoreboard {
         if (entity.isDead())
             return TranslationManager.translation(
                     "feature.displays.scoreboard.citywar.mascot.dead.to_small",
-                    Component.text(FontImageWrapper.replaceFontImages(":dead1:"))
+                    Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":dead1:"))
             ).color(TextColor.color(0xFF3246));
 
         double health = entity.getHealth();
@@ -180,6 +179,6 @@ public class CityWarScoreboard extends BaseScoreboard {
         int interpolatedColor = MathUtils.lerpColor(fullLifeColor, noLifeColor, lerpRatio);
         TextColor color = TextColor.color(interpolatedColor);
 
-        return text("%d/%d %s".formatted((int) health, (int) maxHealth, FontImageWrapper.replaceFontImages(":heart:")), color);
+        return text("%d/%d %s".formatted((int) health, (int) maxHealth, fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":heart:")), color);
     }
 }

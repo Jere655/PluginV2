@@ -1,6 +1,5 @@
 package fr.openmc.core.features.events.contents.weeklyevents.contents.contest.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.template.ConfirmMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
@@ -39,7 +38,7 @@ public class VoteMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-48::contest_menu:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-48::contest_menu:");
     }
 
     @Override
@@ -194,7 +193,7 @@ public class VoteMenu extends Menu {
                         () -> new VoteMenu(player).open(),
                         loreAccept,
                         loreDeny,
-                        FontImageWrapper.replaceFontImages("§r§f:offset_-48::contest_menu:"),
+                        fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-48::contest_menu:"),
                         InventorySize.LARGE,
                         15,
                         11
@@ -247,7 +246,7 @@ public class VoteMenu extends Menu {
                         () -> new VoteMenu(player).open(),
                         loreAccept,
                         loreDeny,
-                        FontImageWrapper.replaceFontImages("§r§f:offset_-48::contest_menu:"),
+                        fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-48::contest_menu:"),
                         InventorySize.LARGE,
                         15,
                         11

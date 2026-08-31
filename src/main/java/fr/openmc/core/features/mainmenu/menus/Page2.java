@@ -1,6 +1,5 @@
 package fr.openmc.core.features.mainmenu.menus;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.entity.player.OMCPlayer;
 import fr.openmc.api.packetmenulib.PacketMenuLib;
 import fr.openmc.api.packetmenulib.events.InventoryClickEvent;
@@ -53,7 +52,7 @@ public class Page2 implements Menu {
     private final Map<Integer, ItemStack> content;
 
     public Page2() {
-        title = Component.text(FontImageWrapper.replaceFontImages(":offset_-26::omc_main_menu_page_2:"));
+        title = Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":offset_-26::omc_main_menu_page_2:"));
         content = new HashMap<>();
 
         ItemStack advancementsItem = new ItemStack(Material.PAPER);
@@ -208,7 +207,7 @@ public class Page2 implements Menu {
             MessagesManager.sendMessage(player,
                     TranslationManager.translation(
                             "feature.mainmenu.message.leaderboard_dev",
-                            Component.text(FontImageWrapper.replaceFontImages(":sad:"))
+                            Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":sad:"))
                     ).color(NamedTextColor.RED),
                     Prefix.OPENMC,
                     MessageType.INFO,

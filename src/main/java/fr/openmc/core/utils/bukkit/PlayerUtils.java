@@ -1,6 +1,5 @@
 package fr.openmc.core.utils.bukkit;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.settings.PlayerSettingsManager;
 import fr.openmc.core.features.settings.SettingType;
@@ -23,7 +22,7 @@ public class PlayerUtils {
 	public static void sendFadeTitleTeleport(Player player, Location location) {
 		if (PlayerSettingsManager.getPlayerSettings(player.getUniqueId()).getSetting(SettingType.TELEPORT_TITLE_FADE)) {
             player.showTitle(Title.title(
-                    Component.text(FontImageWrapper.replaceFontImages(":tp_effect:")),
+                    Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":tp_effect:")),
 					TranslationManager.translation("core.utils.fade_title.teleporting"),
                     Title.Times.times(Duration.ofMillis(20 * 50), Duration.ofMillis(10 * 50), Duration.ofMillis(10 * 50))
             ));

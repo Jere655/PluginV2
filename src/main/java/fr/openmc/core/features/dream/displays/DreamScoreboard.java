@@ -1,6 +1,5 @@
 package fr.openmc.core.features.dream.displays;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.scoreboard.SternalBoard;
 import fr.openmc.core.features.displays.scoreboards.BaseScoreboard;
 import fr.openmc.core.features.dream.DreamManager;
@@ -37,7 +36,7 @@ public class DreamScoreboard extends BaseScoreboard {
     @Override
     protected void updateTitle(Player player, SternalBoard board) {
         board.updateTitle(canShowLogo
-                ? Component.text(FontImageWrapper.replaceFontImages(":dream_openmc:"))
+                ? Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":dream_openmc:"))
                 : Component.text("OPENMC", NamedTextColor.DARK_BLUE));
     }
 

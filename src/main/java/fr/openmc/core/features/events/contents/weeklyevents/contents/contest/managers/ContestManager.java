@@ -27,7 +27,6 @@ import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.mod
 import fr.openmc.core.features.leaderboards.LeaderboardManager;
 import fr.openmc.core.features.mailboxes.MailboxManager;
 import fr.openmc.core.hooks.WorldGuardHook;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.ColorUtils;
@@ -85,11 +84,7 @@ public class ContestManager extends Feature implements HasDatabase, LoadAfterIte
     @Override
     public void init() {
         // ** LISTENERS **
-        if (ItemsAdderHook.isEnable()) {
-            OMCPlugin.registerEvents(
-                    ContestIntractEvents::new
-            );
-        }
+        OMCPlugin.registerEvents(ContestIntractEvents::new);
 
         // ** COMMANDS **
         CommandsManager.getHandler().register(

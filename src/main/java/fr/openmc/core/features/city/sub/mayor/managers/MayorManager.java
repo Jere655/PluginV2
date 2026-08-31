@@ -24,7 +24,6 @@ import fr.openmc.core.features.city.sub.mayor.perks.basic.*;
 import fr.openmc.core.features.city.sub.mayor.perks.event.*;
 import fr.openmc.core.features.city.sub.milestone.rewards.FeaturesRewards;
 import fr.openmc.core.hooks.FancyNpcsHook;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import lombok.Getter;
@@ -90,10 +89,7 @@ public class MayorManager {
                 MilitaryDissuasion::new,
                 IdyllicRain::new);
 
-        if (ItemsAdderHook.isEnable()) {
-            OMCPlugin.registerEvents(
-                    UrneListener::new);
-        }
+        OMCPlugin.registerEvents(UrneListener::new);
         if (FancyNpcsHook.isEnable()) {
             OMCPlugin.registerEvents(
                     NPCManager::new);

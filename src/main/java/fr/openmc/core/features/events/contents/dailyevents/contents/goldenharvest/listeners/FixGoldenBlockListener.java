@@ -1,6 +1,6 @@
 package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.listeners;
 
-import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockBreakEvent;
 import fr.openmc.core.OMCRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,7 +18,7 @@ import org.bukkit.event.Listener;
 public class FixGoldenBlockListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onGoldenBlockBreak(CustomBlockBreakEvent event) {
-        String brokenID = event.getNamespacedID();
+        String brokenID = event.customBlock().id().asString();
         if (OMCRegistry.CUSTOM_ITEMS.get(brokenID).isEmpty()) return;
 
         Material attachedStemType = brokenID.contains("pumpkin")
@@ -31,7 +31,7 @@ public class FixGoldenBlockListener implements Listener {
 
         for (BlockFace face : new BlockFace[]{
                 BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
-            Block relative = event.getBlock().getRelative(face);
+            Block relative = event.bukkitBlock().getRelative(face);
             if (!relative.getType().equals(attachedStemType)) continue;
 
             BlockData data = relative.getBlockData();

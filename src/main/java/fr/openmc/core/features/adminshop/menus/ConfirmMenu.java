@@ -1,6 +1,5 @@
 package fr.openmc.core.features.adminshop.menus;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.input.dialog.DialogInput;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
@@ -50,7 +49,7 @@ public class ConfirmMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-11::adminshop:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-11::adminshop:");
     }
 
     @Override

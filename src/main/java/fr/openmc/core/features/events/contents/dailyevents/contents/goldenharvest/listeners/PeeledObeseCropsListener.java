@@ -1,8 +1,7 @@
 package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.listeners;
 
-import dev.lone.itemsadder.api.CustomBlock;
 import fr.openmc.core.OMCRegistry;
-import fr.openmc.core.hooks.itemsadder.behaviours.BehaviourUpBlock;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.registry.items.CustomItem;
 import fr.openmc.core.registry.items.keys.KeyBlock;
 import fr.openmc.core.utils.bukkit.ItemUtils;
@@ -44,9 +43,6 @@ public class PeeledObeseCropsListener implements Listener {
         KeyBlock keyBlock = KeyBlock.custom(clickedCustomItem);
         CustomItem peeledVariant = PEELED_OBESE_CROPS_MAPPING.get(keyBlock);
         if (peeledVariant == null) return;
-        CustomBlock peeledVarientBlock = peeledVariant.getCustomBlock();
-        if (peeledVarientBlock == null) return;
-
         event.setCancelled(true);
 
         Player player = event.getPlayer();
@@ -59,9 +55,7 @@ public class PeeledObeseCropsListener implements Listener {
                 0.6f
         );
 
-        peeledVarientBlock.place(clickedBlock.getLocation());
-
-        BehaviourUpBlock.onBreak(clickedBlock, keyBlock.getNamespacedID());
+        if (!OpenMCContent.placeBlock(clickedBlock.getLocation(), peeledVariant.getId())) return;
 
         ItemUtils.reduceDurability(itemInHand, 5);
     }

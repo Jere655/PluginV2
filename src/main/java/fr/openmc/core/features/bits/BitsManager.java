@@ -4,7 +4,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.annotations.Credit;
@@ -16,7 +15,6 @@ import fr.openmc.core.features.bits.models.BitsPlayer;
 import fr.openmc.core.features.city.sub.bank.CityBankManager;
 import fr.openmc.core.hooks.github.GitHubHook;
 import fr.openmc.core.hooks.github.models.ContributorStats;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -127,11 +125,7 @@ public class BitsManager extends Feature implements HasDatabase, HasCommands {
     }
 
     public static String getBitsIcon() {
-        if (ItemsAdderHook.isEnable()) {
-            return FontImageWrapper.replaceFontImages("§f:bits:");
-        } else {
-            return "✯";
-        }
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§f:bits:");
     }
 
     public static void applyContributorBitsUpdate(Long githubID) {

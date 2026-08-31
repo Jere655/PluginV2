@@ -1,8 +1,7 @@
 package fr.openmc.core.features.shops;
 
-import dev.lone.itemsadder.api.CustomFurniture;
-import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
-import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureInteractEvent;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.shops.managers.ShopManager;
 import fr.openmc.core.features.shops.menus.ShopMenu;
@@ -97,11 +96,11 @@ public class ShopListener implements Listener {
     
     @EventHandler
     public void onFurnitureBreak(FurnitureBreakEvent e) {
-        CustomFurniture furniture = e.getFurniture();
+        var furniture = e.furniture();
         
-        if (furniture == null || !furniture.getNamespacedID().equals(OMCRegistry.CUSTOM_ITEMS.CAISSE.getId())) return;
+        if (furniture == null || !furniture.id().asString().equals(OMCRegistry.CUSTOM_ITEMS.CAISSE.getId())) return;
         
-        Entity furnitureEntity = furniture.getEntity();
+        Entity furnitureEntity = furniture.bukkitEntity();
         if (furnitureEntity == null) return;
         if (ShopManager.getShopAt(furnitureEntity.getLocation().toBlockLocation()) == null) return;
         e.setCancelled(true);
@@ -109,12 +108,12 @@ public class ShopListener implements Listener {
     
     @EventHandler
     public void onFurnitureInteract(FurnitureInteractEvent e) {
-		CustomFurniture furniture = e.getFurniture();
+        var furniture = e.furniture();
         
-        if (furniture == null || !furniture.getNamespacedID().equals(OMCRegistry.CUSTOM_ITEMS.CAISSE.getId())) return;
+        if (furniture == null || !furniture.id().asString().equals(OMCRegistry.CUSTOM_ITEMS.CAISSE.getId())) return;
         
-        Player player = e.getPlayer();
-        Entity furnitureEntity = furniture.getEntity();
+        Player player = e.player();
+        Entity furnitureEntity = furniture.bukkitEntity();
 	    if (furnitureEntity == null) {
 		    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.entity_is_null"), Prefix.SHOP, MessageType.ERROR, true);
 		    return;
@@ -128,7 +127,7 @@ public class ShopListener implements Listener {
 	    
 	    e.setCancelled(true);
         if (shop.isMenuOpened()) {
-            MessagesManager.sendMessage(e.getPlayer(), TranslationManager.translation("feature.shop.menu.already_opened"), Prefix.SHOP, MessageType.WARNING, false);
+            MessagesManager.sendMessage(e.player(), TranslationManager.translation("feature.shop.menu.already_opened"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
         if (shop.hasItem()) {
@@ -138,7 +137,7 @@ public class ShopListener implements Listener {
             new ShopSellingMenu(player, shop).open();
             shop.setMenuOpened(true);
         } else {
-            MessagesManager.sendMessage(e.getPlayer(), TranslationManager.translation("feature.shop.no_item"), Prefix.SHOP, MessageType.ERROR, true);
+            MessagesManager.sendMessage(e.player(), TranslationManager.translation("feature.shop.no_item"), Prefix.SHOP, MessageType.ERROR, true);
         }
     }
     

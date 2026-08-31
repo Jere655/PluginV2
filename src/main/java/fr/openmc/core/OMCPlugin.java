@@ -60,8 +60,6 @@ import fr.openmc.core.features.tpa.TPAManager;
 import fr.openmc.core.features.updates.UpdateManager;
 import fr.openmc.core.hooks.*;
 import fr.openmc.core.hooks.github.GitHubHook;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
-import fr.openmc.core.listeners.ItemsAddersListener;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import fr.openmc.core.utils.text.MotdUtils;
 import io.papermc.paper.datapack.Datapack;
@@ -148,7 +146,6 @@ public class OMCPlugin extends JavaPlugin {
             new LuckPermsHook(),
             new PapiHook(),
             new WorldGuardHook(),
-            new ItemsAdderHook(),
             new FancyNpcsHook(),
             new GitHubHook()
     ));
@@ -215,21 +212,13 @@ public class OMCPlugin extends JavaPlugin {
                     registerFeature(feature);
                 });
 
-        // * Si ItemsAdder n'est pas présent, alors on charge les dernières features maintenant
-        if (!ItemsAdderHook.isEnable()) {
-            loadAfterItemsAdder();
-        }
+        loadAfterItemsAdder();
     }
 
     /**
      * Charge les registres et features qui doivent être lancé apres ItemsAdder
      */
     public void loadAfterItemsAdder() {
-        ItemsAddersListener.setLoaded(true);
-
-        /* LOAD ITEMS ADDER CONTENTS */
-        ItemsAdderHook.loadContents();
-
         /* REGISTRIES */
         OMCRegistry.postInitAll();
 

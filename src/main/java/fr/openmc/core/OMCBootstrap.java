@@ -3,7 +3,6 @@ package fr.openmc.core;
 import fr.openmc.core.bootstrap.integration.DatapackLoader;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.hooks.craftengine.CraftEnginePackGenerator;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
@@ -34,11 +33,11 @@ public class OMCBootstrap implements PluginBootstrap {
         // ** LOAD DATAPACKS **
         DatapackLoader.loadAllInResource(context);
 
-        // ** LOAD ITEMS ADDER NAMESPACES **
-        ItemsAdderHook.copyContentsToItemsAdder(context, "contents");
-
-        // ** CONVERT ITEMS ADDER CONTENTS FOR CRAFT ENGINE **
-        CraftEnginePackGenerator.generate(
+        // ** CONVERT BUNDLED OPENMC CONTENTS FOR CRAFT ENGINE **
+        // Do not route the conversion through plugins/ItemsAdder: CraftEngine
+        // must boot on servers where ItemsAdder is not installed.
+        CraftEnginePackGenerator.generateBundled(
+                context.getDataDirectory().toFile(),
                 context.getDataDirectory().toFile().getParentFile(),
                 context.getDataDirectory().resolve("craftengine-conversion-report.txt").toFile()
         );

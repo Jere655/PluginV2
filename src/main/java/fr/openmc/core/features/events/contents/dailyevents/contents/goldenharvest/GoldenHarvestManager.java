@@ -1,13 +1,12 @@
 package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest;
 
-import dev.lone.itemsadder.api.CustomBlock;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.types.HasListeners;
 import fr.openmc.core.bootstrap.listeners.ListenerFactory;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.listeners.*;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.obesecrops.ObeseCropsRegistry;
-import fr.openmc.core.hooks.itemsadder.behaviours.BehaviourUpBlock;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.registry.items.CustomItem;
 import fr.openmc.core.registry.items.keys.KeyBlock;
 import fr.openmc.core.registry.loottable.loots.ItemLoot;
@@ -132,11 +131,8 @@ public class GoldenHarvestManager extends Feature implements HasListeners {
 
         for (Map.Entry<Double, CustomItem> entry : obeseCrops.entrySet()) {
             if (chance <= entry.getKey()) {
-                CustomBlock customBlock = entry.getValue().getCustomBlock();
-                if (customBlock == null) return;
-                customBlock.place(block.getLocation());
+                if (!OpenMCContent.placeBlock(block.getLocation(), entry.getValue().getId())) return;
                 ObeseCropsRegistry.mark(block.getLocation());
-                BehaviourUpBlock.onPlace(block, customBlock.getNamespacedID());
                 return;
             }
         }

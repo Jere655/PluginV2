@@ -1,8 +1,8 @@
 package fr.openmc.core.features.tickets;
 
-import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
-import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
-import dev.lone.itemsadder.api.Events.FurniturePlacedEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureInteractEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurniturePlaceEvent;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
 import fr.openmc.core.events.LootboxRewardEvent;
@@ -68,17 +68,17 @@ public class TicketListener implements Listener, NotLoadInUnitTest {
 
     @EventHandler
     public void onMachineBallsInteraction(FurnitureInteractEvent furniture) {
-        if (Objects.equals(furniture.getNamespacedID(), "omc_blocks:ball_machine")) {
-            furniture.getPlayer().playSound(Sound.sound(Key.key("minecraft", "block.barrel.open"), Sound.Source.BLOCK, 1f, 1f));
-            new MachineBallsMenu(furniture.getPlayer()).open();
+        if (Objects.equals(furniture.furniture().id().asString(), "omc_blocks:ball_machine")) {
+            furniture.player().playSound(Sound.sound(Key.key("minecraft", "block.barrel.open"), Sound.Source.BLOCK, 1f, 1f));
+            new MachineBallsMenu(furniture.player()).open();
         }
     }
 
     @EventHandler
-    public void onMachinePlaced(FurniturePlacedEvent event) {
-        if (Objects.equals(event.getNamespacedID(), "omc_blocks:ball_machine")) {
+    public void onMachinePlaced(FurniturePlaceEvent event) {
+        if (Objects.equals(event.furniture().id().asString(), "omc_blocks:ball_machine")) {
             Bukkit.getScheduler().runTaskLater(fr.openmc.core.OMCPlugin.getInstance(), () -> {
-                Location machineLocation = event.getBukkitEntity().getLocation();
+                Location machineLocation = event.furniture().bukkitEntity().getLocation();
                 createMachineHologram(machineLocation);
             }, 1L);
         }
@@ -86,8 +86,8 @@ public class TicketListener implements Listener, NotLoadInUnitTest {
 
     @EventHandler
     public void onMachineBreak(FurnitureBreakEvent event) {
-        if (Objects.equals(event.getNamespacedID(), "omc_blocks:ball_machine")) {
-            Location machineLocation = event.getBukkitEntity().getLocation();
+        if (Objects.equals(event.furniture().id().asString(), "omc_blocks:ball_machine")) {
+            Location machineLocation = event.furniture().bukkitEntity().getLocation();
             removeMachineHologram(machineLocation);
         }
     }

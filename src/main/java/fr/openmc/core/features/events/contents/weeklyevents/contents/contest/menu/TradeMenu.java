@@ -1,6 +1,5 @@
 package fr.openmc.core.features.events.contents.weeklyevents.contents.contest.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemMenuBuilder;
@@ -9,7 +8,6 @@ import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.man
 import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.managers.ContestPlayerManager;
 import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.managers.TradeYMLManager;
 import fr.openmc.core.features.mailboxes.MailboxManager;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.bukkit.ItemUtils;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
@@ -42,7 +40,7 @@ public class TradeMenu extends Menu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-48::contest_menu:");
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages("§r§f:offset_-48::contest_menu:");
     }
 
     @Override
@@ -98,12 +96,6 @@ public class TradeMenu extends Menu {
 
             inventory.put(tradeSlots.get(i), new ItemMenuBuilder(this, material, meta -> meta.lore(lore))
                     .setOnClick(event -> {
-                        if (!ItemsAdderHook.isEnable()) {
-                            MessagesManager.sendMessage(player,
-                                    TranslationManager.translation("feature.events.contest.trade.unavailable"),
-                                    Prefix.CONTEST, MessageType.ERROR, true);
-                            return;
-                        }
 
                         if (event.getCurrentItem() == null) return;
 

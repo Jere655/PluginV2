@@ -15,7 +15,6 @@ import fr.openmc.core.features.shops.ShopFurniture;
 import fr.openmc.core.features.shops.ShopListener;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.features.shops.models.ShopSale;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.world.WorldUtils;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -196,11 +195,7 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, HasData
 		shopsByLocation.put(shop.getLocation(), shop);
 		shops.put(shop.getShopUUID(), shop);
         
-        if (ItemsAdderHook.isEnable()) {
-	        if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
-        } else {
-			cashBlock.setType(Material.OAK_SIGN);
-        }
+        if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
 		
         return true;
     }
@@ -228,8 +223,7 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, HasData
         Block cashBlock = world.getBlockAt(multiblock.cashBlockLoc());
         Block stockBlock = world.getBlockAt(multiblock.stockBlockLoc());
 
-        if (ItemsAdderHook.isEnable()) {
-            if (ShopFurniture.hasFurniture(cashBlock)) {
+        if (ShopFurniture.hasFurniture(cashBlock)) {
 				if (!ShopFurniture.removeShopFurniture(cashBlock)) {
 					OMCLogger.warn("Cannot remove furniture for " + shop.getName());
 					return false;
@@ -239,10 +233,6 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, HasData
 				return false;
             }
 			else OMCLogger.warn(shop.getName() + " has no furniture detected.");
-        } else if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) {
-	        OMCLogger.warn("Bad multiblock for " + shop.getName());
-			return false;
-        }
 	    cashBlock.setType(Material.AIR); // Remove sign or furniture block
         stockBlock.setType(Material.AIR); // Remove barrel block
         

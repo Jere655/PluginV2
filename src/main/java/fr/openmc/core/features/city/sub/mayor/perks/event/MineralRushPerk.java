@@ -1,6 +1,6 @@
 package fr.openmc.core.features.city.sub.mayor.perks.event;
 
-import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockBreakEvent;
 import fr.openmc.api.chronometer.Chronometer;
 import fr.openmc.api.cooldown.DynamicCooldownManager;
 import fr.openmc.core.OMCRegistry;
@@ -114,10 +114,10 @@ public class MineralRushPerk implements Listener {
         if (!PerkManager.hasPerk(city.getMayor(), Perks.MINERAL_RUSH.getId())) return;
         if (!DynamicCooldownManager.isReady(city.getUniqueId(), "city:mineral_rush")) return;
 
-        String namespace = event.getNamespacedID();
+        String namespace = event.customBlock().id().asString();
         if (!namespace.equals("omc_blocks:aywenite_ore") && !namespace.equals("omc_blocks:deepslate_aywenite_ore")) return;
 
-        Block block = event.getBlock();
+        Block block = event.bukkitBlock();
 
         block.getWorld().dropItemNaturally(block.getLocation(), OMCRegistry.CUSTOM_ITEMS.AYWENITE.getBest());
     }

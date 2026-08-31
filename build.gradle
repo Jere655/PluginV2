@@ -32,6 +32,9 @@ repositories {
         url "https://maven.devs.beer/"
     }
     maven {
+        url "https://repo.momirealms.net/releases/"
+    }
+    maven {
         url "https://repo.fancyinnovations.com/releases"
     }
     maven {
@@ -55,7 +58,8 @@ dependencies {
         exclude group: 'com.google.guava', module: 'guava'
         exclude group: 'com.google.code.gson', module: 'gson'
     }
-    compileOnly "beer.devs:itemsadder-api:${itemsAdderVersion}"
+    compileOnly "net.momirealms:craft-engine-core:${craftEngineVersion}"
+    compileOnly "net.momirealms:craft-engine-bukkit:${craftEngineVersion}"
     compileOnly "net.luckperms:api:${luckpermsVersion}"
     compileOnly "me.clip:placeholderapi:${placeholderApiVersion}"
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:${worldeditVersion}") {
@@ -75,7 +79,6 @@ dependencies {
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    testCompileOnly "beer.devs:itemsadder-api:${itemsAdderVersion}"
 
     testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"

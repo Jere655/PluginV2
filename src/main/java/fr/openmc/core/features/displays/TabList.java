@@ -7,14 +7,12 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.types.LoadIfEnable;
 import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
 import fr.openmc.core.features.dream.DreamUtils;
 import fr.openmc.core.hooks.ProtocolLibHook;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.Component;
@@ -90,12 +88,7 @@ public class TabList extends Feature implements NotLoadInUnitTest, LoadIfEnable<
         }
 
         boolean isInDream = DreamUtils.isInDream(player);
-        String logo;
-        if (ItemsAdderHook.isEnable()) {
-            logo = FontImageWrapper.replaceFontImages(isInDream ? ":dream_openmc:" : ":openmc:");
-        } else {
-            logo = "OPEN MC";
-        }
+        String logo = fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(isInDream ? ":dream_openmc:" : ":openmc:");
 
         Component header = !isInDream
                 ? TranslationManager.translation(

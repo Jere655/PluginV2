@@ -1,8 +1,8 @@
 package fr.openmc.core.features.itemsadder;
 
-import dev.lone.itemsadder.api.CustomStack;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -32,8 +32,7 @@ public class SpawnerExtractorListener implements Listener, NotLoadInUnitTest {
 
         Player player = event.getPlayer();
         ItemStack tool = player.getInventory().getItemInMainHand();
-        CustomStack custom = CustomStack.byItemStack(tool);
-        if (custom == null || !custom.getNamespacedID().equals("omc_items:spawner_extractor"))
+        if (!OpenMCContent.isItem(tool, "omc_items:spawner_extractor"))
             return;
 
         EntityType entityType = ((CreatureSpawner) block.getState()).getSpawnedType();

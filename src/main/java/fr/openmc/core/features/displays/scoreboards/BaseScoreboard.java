@@ -1,8 +1,6 @@
 package fr.openmc.core.features.displays.scoreboards;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.scoreboard.SternalBoard;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -11,7 +9,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 
 public abstract class BaseScoreboard {
-    protected static final boolean canShowLogo = ItemsAdderHook.isEnable();
+    protected static final boolean canShowLogo = true;
 
     /**
      * Initialise le scoreboard pour un joueur
@@ -65,7 +63,7 @@ public abstract class BaseScoreboard {
      */
     public Component getTitle() {
         return canShowLogo
-                ? Component.text(FontImageWrapper.replaceFontImages(":openmc:"))
+                ? Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":openmc:"))
                 : TranslationManager.translation("feature.displays.scoreboard.title.text").color(NamedTextColor.LIGHT_PURPLE);
     }
 

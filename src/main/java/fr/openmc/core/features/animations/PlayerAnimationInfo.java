@@ -15,4 +15,5 @@ public class PlayerAnimationInfo {
     private Animation animation;
     private float oldWalkSpeed;
     private float oldFlySpeed;
+    private boolean oldInvulnerable;
 }

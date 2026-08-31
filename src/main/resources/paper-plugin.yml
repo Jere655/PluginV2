@@ -6,6 +6,10 @@ bootstrapper: fr.openmc.core.OMCBootstrap
 
 dependencies:
   server:
+    CraftEngine:
+      load: BEFORE
+      required: true
+      join-classpath: true
     FancyNpcs:
       load: BEFORE
       required: false
@@ -13,12 +17,6 @@ dependencies:
       load: BEFORE
       required: false
     LuckPerms:
-      load: BEFORE
-      required: false
-    ItemsAdder:
-      load: BEFORE
-      required: false
-    ItemsAdderAdditions:
       load: BEFORE
       required: false
     ProtocolLib:

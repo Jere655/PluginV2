@@ -1,6 +1,6 @@
 package fr.openmc.core.features.city.sub.mascots.listeners;
 
-import dev.lone.itemsadder.api.Events.CustomBlockPlaceEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockPlaceEvent;
 import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
 import fr.openmc.core.features.city.sub.mascots.utils.MascotUtils;
 import io.papermc.paper.event.entity.EntityMoveEvent;
@@ -21,7 +21,7 @@ import java.util.Collection;
 public class MascotsProtectionsListener implements Listener, NotLoadInUnitTest {
     @EventHandler
     public void onBlockPlace(CustomBlockPlaceEvent event) {
-        Block block = event.getBlock();
+        Block block = event.bukkitBlock();
         Location loc = block.getLocation();
 
         Collection<Entity> nearbyEntities = loc.getWorld().getNearbyEntities(loc, 1.5, 1.5, 1.5);

@@ -1,9 +1,7 @@
 package fr.openmc.core.hooks;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.core.bootstrap.hooks.ApiHook;
 import fr.openmc.core.bootstrap.hooks.Hooks;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -59,10 +57,7 @@ public class LuckPermsHook extends Hooks implements ApiHook<LuckPerms> {
         if (prefix == null || prefix.isEmpty()) return "";
         String formattedPrefix = prefix.replace("&", "§");
 
-        if (ItemsAdderHook.isEnable()) {
-            return FontImageWrapper.replaceFontImages(formattedPrefix);
-        }
-        return formattedPrefix;
+        return fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(formattedPrefix);
     }
 
     public static @NotNull Component getFormattedPAPIPrefix(Group group) {
@@ -73,7 +68,7 @@ public class LuckPermsHook extends Hooks implements ApiHook<LuckPerms> {
 
         String formattedPrefix = prefix.replace("&", "§");
 
-        String finalPrefix = ItemsAdderHook.isEnable() ? FontImageWrapper.replaceFontImages(formattedPrefix) : formattedPrefix;
+        String finalPrefix = fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(formattedPrefix);
 
         return LegacyComponentSerializer.legacySection().deserialize(finalPrefix);
     }

@@ -1,6 +1,7 @@
 package fr.openmc.core.hooks.craftengine;
 
 import fr.openmc.core.bootstrap.integration.OMCLogger;
+import fr.openmc.core.utils.FilesUtils;
 import lombok.Getter;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -40,10 +41,31 @@ public final class CraftEnginePackGenerator {
     }
 
     public static ConversionReport generate(File pluginsDir, File reportFile) {
-        File contentsDir = new File(pluginsDir, CONTENTS_PATH);
+        return generateFromContents(new File(pluginsDir, CONTENTS_PATH), pluginsDir, reportFile);
+    }
+
+    /**
+     * Extracts the bundled OpenMC contents to plugin-owned storage and converts
+     * them directly.  This deliberately avoids the old ItemsAdder contents
+     * directory: CraftEngine must be usable when ItemsAdder is absent.
+     */
+    public static ConversionReport generateBundled(File dataDirectory, File pluginsDir, File reportFile) {
+        File contentsDir = new File(dataDirectory, "craftengine-source-contents");
+        try {
+            deleteRecursively(contentsDir.toPath());
+            Files.createDirectories(contentsDir.toPath());
+            FilesUtils.copyResourceFolder("contents", contentsDir);
+        } catch (Exception e) {
+            OMCLogger.error("Impossible d'extraire les contenus OpenMC pour CraftEngine", e);
+            return null;
+        }
+        return generateFromContents(contentsDir, pluginsDir, reportFile);
+    }
+
+    private static ConversionReport generateFromContents(File contentsDir, File pluginsDir, File reportFile) {
 
         if (!contentsDir.isDirectory()) {
-            OMCLogger.warn("Contenus ItemsAdder introuvables ({}), pack CraftEngine non généré",
+            OMCLogger.warn("Contenus source introuvables ({}), pack CraftEngine non généré",
                     contentsDir.getAbsolutePath());
             return null;
         }
@@ -73,7 +95,7 @@ public final class CraftEnginePackGenerator {
         }
 
         lastReport = report;
-        OMCLogger.successFormatted("Pack CraftEngine généré depuis les contenus ItemsAdder : {}", report.summary());
+        OMCLogger.successFormatted("Pack CraftEngine généré depuis les contenus OpenMC : {}", report.summary());
 
         for (String unsupported : report.getUnsupported()) {
             OMCLogger.warn("Contenu ItemsAdder non converti : {}", unsupported);

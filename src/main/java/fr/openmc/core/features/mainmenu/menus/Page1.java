@@ -1,7 +1,5 @@
 package fr.openmc.core.features.mainmenu.menus;
 
-import dev.lone.itemsadder.api.CustomStack;
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.entity.player.OMCPlayer;
 import fr.openmc.api.packetmenulib.PacketMenuLib;
 import fr.openmc.api.packetmenulib.events.InventoryClickEvent;
@@ -24,6 +22,7 @@ import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.mod
 import fr.openmc.core.features.homes.command.TpHomeCommand;
 import fr.openmc.core.features.mailboxes.commands.MailboxCommand;
 import fr.openmc.core.features.mainmenu.listeners.MainMenuListener;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.features.milestones.menus.MainMilestonesMenu;
 import fr.openmc.core.features.profile.menu.ProfileMenu;
 import fr.openmc.core.features.quests.command.QuestCommand;
@@ -79,12 +78,12 @@ public class Page1 implements Menu {
         });
 
         if (playerCity != null) {
-            title = Component.text(FontImageWrapper.replaceFontImages(":offset_-26::omc_main_menu_page_1:"));
+            title = Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":offset_-26::omc_main_menu_page_1:"));
             Component cityName = Component.text(playerCity.getName()).color(NamedTextColor.YELLOW);
             cityItem.editMeta(meta -> meta.itemName(TranslationManager.translation("feature.mainmenu.item.city.name", cityName)
                     .color(NamedTextColor.YELLOW)));
         } else {
-            title = Component.text(FontImageWrapper.replaceFontImages(":offset_-26::omc_main_menu_page_1_sans_ville:"));
+            title = Component.text(fr.openmc.core.utils.text.fonts.Fonts.replaceFontImages(":offset_-26::omc_main_menu_page_1_sans_ville:"));
             cityItem.editMeta(meta -> meta.itemName(TranslationManager.translation("feature.mainmenu.item.city.no_city")
                     .color(NamedTextColor.GRAY)));
         }
@@ -186,9 +185,9 @@ public class Page1 implements Menu {
                 content.put(slot, profilItem);
         });
 
-        CustomStack playerHeadStack = CustomStack.getInstance("omc_main_menu:player_head");
-        ItemStack playerHeadProfileItem = playerHeadStack != null
-                ? playerHeadStack.getItemStack()
+        ItemStack playerHeadProfileItem = OpenMCContent.createItem("omc_main_menu:player_head");
+        playerHeadProfileItem = playerHeadProfileItem != null
+                ? playerHeadProfileItem
                 : ItemStack.of(Material.PLAYER_HEAD);
         playerHeadProfileItem.editMeta(meta -> {
             meta.customName(TranslationManager.translation("feature.mainmenu.item.profile.name")

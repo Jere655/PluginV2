@@ -1,10 +1,10 @@
 package fr.openmc.core.features.city.sub.mayor.listeners;
 
-import dev.lone.itemsadder.api.CustomFurniture;
-import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
-import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
-import dev.lone.itemsadder.api.Events.FurniturePlacedEvent;
-import dev.lone.itemsadder.api.Events.FurniturePrePlaceEvent;
+import net.momirealms.craftengine.bukkit.api.CraftEngineFurniture;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureAttemptPlaceEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurnitureInteractEvent;
+import net.momirealms.craftengine.bukkit.api.event.FurniturePlaceEvent;
 import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
 import fr.openmc.core.features.city.CityPermission;
@@ -35,15 +35,15 @@ public class UrneListener implements Listener {
 
     @EventHandler
     public void onUrneInteractEvent(FurnitureInteractEvent event) {
-        if (!Objects.equals(event.getNamespacedID(), "omc_blocks:urne")) return;
+        if (!Objects.equals(event.furniture().id().asString(), "omc_blocks:urne")) return;
 
-        CustomFurniture furniture = event.getFurniture();
-        if (furniture == null || furniture.getEntity() == null) return;
+        var furniture = event.furniture();
+        if (furniture == null || furniture.bukkitEntity() == null) return;
 
-        Player player = event.getPlayer();
+        Player player = event.player();
         City playerCity = CityManager.getPlayerCity(player.getUniqueId());
 
-        Chunk chunk = furniture.getEntity().getChunk();
+        Chunk chunk = furniture.bukkitEntity().getChunk();
         City city = CityManager.getCityFromChunk(chunk.getX(), chunk.getZ());
 
         if (playerCity == null) {
@@ -53,7 +53,7 @@ public class UrneListener implements Listener {
 
         if (city == null) {
             if (player.getGameMode() != GameMode.CREATIVE) {
-                furniture.remove(false);
+                CraftEngineFurniture.remove(furniture.bukkitEntity(), false, false);
             }
 
             MessagesManager.sendMessage(player, TranslationManager.translation("feature.city.mayor.error.not_in_city"), Prefix.MAYOR, MessageType.ERROR, false);
@@ -89,9 +89,9 @@ public class UrneListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onUrnePrePlaceEvent(FurniturePrePlaceEvent event) {
-        if (!"omc_blocks:urne".equals(event.getNamespacedID())) return;
-        Player player = event.getPlayer();
+    public void onUrnePrePlaceEvent(FurnitureAttemptPlaceEvent event) {
+        if (!"omc_blocks:urne".equals(event.furniture().id().asString())) return;
+        Player player = event.player();
 
         if (!player.getWorld().getName().equals("world")) {
             event.setCancelled(true);
@@ -106,7 +106,7 @@ public class UrneListener implements Listener {
             return;
         }
 
-        Chunk placedInChunk = event.getLocation().getChunk();
+        Chunk placedInChunk = event.location().getChunk();
         City chunkCity = CityManager.getCityFromChunk(placedInChunk.getX(), placedInChunk.getZ());
         if (chunkCity == null) {
             event.setCancelled(true);
@@ -136,19 +136,19 @@ public class UrneListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    private void onUrnePlaceSuccessEvent(FurniturePlacedEvent event) {
+    private void onUrnePlaceSuccessEvent(FurniturePlaceEvent event) {
         if (!FancyNpcsHook.isEnable())
             return;
 
-        if (!"omc_blocks:urne".equals(event.getNamespacedID()))
+        if (!"omc_blocks:urne".equals(event.furniture().id().asString()))
             return;
 
-        CustomFurniture furniture = event.getFurniture();
-        if (furniture == null || furniture.getEntity() == null) return;
+        var furniture = event.furniture();
+        if (furniture == null || furniture.bukkitEntity() == null) return;
 
-        Location urneLocation = furniture.getEntity().getLocation();
+        Location urneLocation = furniture.bukkitEntity().getLocation();
 
-        Player player = event.getPlayer();
+        Player player = event.player();
         City playerCity = CityManager.getPlayerCity(player.getUniqueId());
         Location locationMayor = LocationUtils.getSafeNearbySurface(urneLocation.clone().add(2, 0, 0), 2);
         Location locationOwner = LocationUtils.getSafeNearbySurface(urneLocation.clone().add(-2, 0, 0), 2);
@@ -165,9 +165,9 @@ public class UrneListener implements Listener {
 
     @EventHandler
     private void onUrneBreakEvent(FurnitureBreakEvent event) {
-        if (!Objects.equals(event.getNamespacedID(), "omc_blocks:urne")) return;
+        if (!Objects.equals(event.furniture().id().asString(), "omc_blocks:urne")) return;
 
-        Player player = event.getPlayer();
+        Player player = event.player();
 
         City playerCity = CityManager.getPlayerCity(player.getUniqueId());
         if (playerCity == null) {

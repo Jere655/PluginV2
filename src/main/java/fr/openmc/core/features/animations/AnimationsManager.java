@@ -9,14 +9,12 @@ import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.annotations.Credit;
 import fr.openmc.core.bootstrap.features.types.HasCommands;
 import fr.openmc.core.bootstrap.features.types.HasListeners;
-import fr.openmc.core.bootstrap.features.types.LoadIfEnable;
 import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.bootstrap.listeners.ListenerFactory;
 import fr.openmc.core.features.animations.commands.DebugAnimationCommand;
 import fr.openmc.core.features.animations.listeners.EmoteListener;
 import fr.openmc.core.features.animations.listeners.PlayerFinishJoiningListener;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import org.bukkit.util.Vector;
 
 import java.io.File;
@@ -29,7 +27,11 @@ import java.util.Map;
 import java.util.Set;
 
 @Credit(developers = {"iambibi_", "gab400"}, graphist = {"Tfloa"})
-public class AnimationsManager extends Feature implements NotLoadInUnitTest, LoadIfEnable<ItemsAdderHook>, HasListeners, HasCommands {
+/**
+ * Native camera animations.  The animation data is Blockbench JSON, but it is
+ * interpreted by OpenMC itself; it must not be gated by ItemsAdder.
+ */
+public class AnimationsManager extends Feature implements NotLoadInUnitTest, HasListeners, HasCommands {
 
     @Override
     public void init() {
@@ -80,9 +82,18 @@ public class AnimationsManager extends Feature implements NotLoadInUnitTest, Loa
 
             String resourcePath = "contents/omc_animations/" + animationName + ".animation.json";
             JsonObject animationJson = loadAnimation(plugin, resourcePath);
+            if (animationJson == null || !animationJson.has("animations")) {
+                continue;
+            }
 
             JsonObject animations = animationJson.getAsJsonObject("animations");
             JsonObject animationObject = animations.getAsJsonObject(animationName);
+            if (animationObject == null) {
+                OMCLogger.error("Animation {} is missing from {}", animationName, resourcePath);
+                continue;
+            }
+            animation.cameraPositions.clear();
+            animation.cameraViews.clear();
             animation.setTotalTicks((int) Math.round(animationObject.get("animation_length").getAsDouble() * 20));
 
             JsonObject bones = animationObject.getAsJsonObject("bones");

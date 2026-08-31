@@ -1,8 +1,8 @@
 package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.listeners;
 
-import dev.lone.itemsadder.api.CustomBlock;
-import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockBreakEvent;
 import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.features.events.contents.dailyevents.DailyEventsManager;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.AbondanceArmorManager;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.GoldenHarvestEvent;
@@ -56,14 +56,14 @@ public class GoldenCropsListener implements Listener {
         if (!DailyEventsManager.isActiveDailyEvent()
                 || !(DailyEventsManager.getActiveDailyEvent() instanceof GoldenHarvestEvent)) return;
         if (ThreadLocalRandom.current().nextDouble() > GoldenHarvestManager.GOLDEN_CROP_ON_OBESE_CHANCE) return;
-        if (!ObeseCropsRegistry.isObeseCrop(event.getBlock().getLocation())) return;
+        if (!ObeseCropsRegistry.isObeseCrop(event.bukkitBlock().getLocation())) return;
 
-        KeyBlock keyBlock = KeyBlock.custom(event.getNamespacedID());
+        KeyBlock keyBlock = KeyBlock.custom(event.customBlock().id().asString());
 
         ItemLoot itemLoot = GoldenHarvestManager.getGoldenCropsOnBreakMapping().get(keyBlock);
         if (itemLoot == null) return;
 
-        giveRewards(itemLoot, event.getPlayer(), event.getBlock());
+        giveRewards(itemLoot, event.getPlayer(), event.bukkitBlock());
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -77,11 +77,8 @@ public class GoldenCropsListener implements Listener {
 
         if (ThreadLocalRandom.current().nextDouble() > GoldenHarvestManager.GOLDEN_CROP_ON_CROP_CHANCE) return;
 
-        CustomBlock customBlock = keyBlockGolden.getCustomBlock();
-        if (customBlock == null) return;
-
         Bukkit.getScheduler().runTaskLater(OMCPlugin.getInstance(), () ->
-                customBlock.place(event.getBlock().getLocation()), 1L);
+                OpenMCContent.placeBlock(event.getBlock().getLocation(), keyBlockGolden.getNamespacedID()), 1L);
 
         ParticleUtils.spawnDispersingParticles(
                 event.getBlock().getLocation().add(0.5, 0.5, 0.5),

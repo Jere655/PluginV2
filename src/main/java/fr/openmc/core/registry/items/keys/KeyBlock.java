@@ -1,8 +1,7 @@
 package fr.openmc.core.registry.items.keys;
 
-import dev.lone.itemsadder.api.CustomBlock;
 import fr.openmc.core.OMCRegistry;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.registry.items.CustomItem;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -33,10 +32,6 @@ public final class KeyBlock {
         return new KeyBlock(type, null, "vanilla:" + type.getKey());
     }
 
-    public static KeyBlock custom(CustomBlock block) {
-        return custom(block.getNamespacedID());
-    }
-
     public static KeyBlock custom(CustomItem item) {
         return custom(item.getId());
     }
@@ -54,27 +49,14 @@ public final class KeyBlock {
     }
 
     public static KeyBlock fromBlock(Block block) {
-        CustomBlock customBlock = getPlacedCustomBlock(block);
-        if (customBlock != null) {
-            return custom(customBlock);
-        }
+        String customBlock = OpenMCContent.blockId(block);
+        if (customBlock != null) return custom(customBlock);
         return vanilla(block.getType().asBlockType());
     }
 
-    private static @Nullable CustomBlock getPlacedCustomBlock(Block block) {
-        if (!ItemsAdderHook.isEnable()) return null;
-        return CustomBlock.byAlreadyPlaced(block);
-    }
-
     /**
-     * Le bloc custom n'est résolu que si le fournisseur ItemsAdder le connait,
-     * il peut donc être absent selon le contenu chargé sur le serveur.
+     * Les blocs custom sont résolus depuis le registre OpenMC/CraftEngine.
      */
-    public @Nullable CustomBlock getCustomBlock() {
-        if (isVanilla() || !ItemsAdderHook.isEnable()) return null;
-        return CustomBlock.getInstance(namespacedID);
-    }
-
     public @Nullable CustomItem getCustomItem() {
         if (isVanilla() || OMCRegistry.CUSTOM_ITEMS == null) return null;
         return OMCRegistry.CUSTOM_ITEMS.get(namespacedID).orElse(null);
@@ -105,8 +87,7 @@ public final class KeyBlock {
         if (block == null) return false;
 
         if (isCustom()) {
-            CustomBlock placed = getPlacedCustomBlock(block);
-            return placed != null && namespacedID.equals(placed.getNamespacedID());
+            return OpenMCContent.isBlock(block, namespacedID);
         }
 
         return blockType == block.getType().asBlockType();

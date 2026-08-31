@@ -1,9 +1,10 @@
 package fr.openmc.core.features.itemsadder.elevator;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import dev.lone.itemsadder.api.CustomStack;
-import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
-import dev.lone.itemsadder.api.Events.CustomBlockPlaceEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockPlaceEvent;
+import fr.openmc.core.OMCRegistry;
+import fr.openmc.core.registry.items.CustomItem;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
@@ -90,7 +91,7 @@ public class ElevatorBlockListener implements Listener {
     public void onPrepareCraft(PrepareItemCraftEvent event) {
         CraftingInventory inv = event.getInventory();
 
-        CustomStack block = null;
+        String block = null;
         ElevatorColor targetColor = null;
 
         if (Arrays.stream(inv.getContents())
@@ -103,10 +104,12 @@ public class ElevatorBlockListener implements Listener {
             if (item == null)
                 continue;
 
-            CustomStack custom = CustomStack.byItemStack(item);
+            String customId = OMCRegistry.CUSTOM_ITEMS.get(item)
+                    .map(CustomItem::getId)
+                    .orElse(null);
 
-            if (custom != null && ElevatorManager.isElevator(custom)) {
-                block = custom;
+            if (ElevatorManager.isElevator(customId)) {
+                block = customId;
                 continue;
             }
 
@@ -122,26 +125,24 @@ public class ElevatorBlockListener implements Listener {
 
         if (targetColor == null) return;
 
-        CustomStack result = targetColor.getCustomItem().getCustomStack();
+        CustomItem result = targetColor.getCustomItem();
+        if (block.equals(result.getId())) return;
 
-        if (result == null) return;
-        if (block.matchNamespacedID(result)) return;
-
-        inv.setResult(result.getItemStack());
+        inv.setResult(result.getBest());
     }
 
     @EventHandler
     public void onElevatorPlaced(CustomBlockPlaceEvent event) {
-        if (!ElevatorManager.isElevator(event.getNamespacedID())) return;
+        if (!ElevatorManager.isElevator(event.customBlock().id().asString())) return;
 
-        ElevatorManager.addToColumn(event.getBlock().getLocation());
+        ElevatorManager.addToColumn(event.bukkitBlock().getLocation());
     }
 
     @EventHandler
     public void onElevatorRemove(CustomBlockBreakEvent event) {
-        if (!ElevatorManager.isElevator(event.getNamespacedID())) return;
+        if (!ElevatorManager.isElevator(event.customBlock().id().asString())) return;
 
-        ElevatorManager.removeToColumn(event.getBlock().getLocation());
+        ElevatorManager.removeToColumn(event.bukkitBlock().getLocation());
     }
 
 }

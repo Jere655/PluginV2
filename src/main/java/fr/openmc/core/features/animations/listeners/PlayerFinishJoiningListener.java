@@ -23,12 +23,12 @@ public class PlayerFinishJoiningListener implements Listener, NotLoadInUnitTest 
         if (!(boolean) PlayerSettingsManager.getPlayerSettings(player.getUniqueId()).getSetting(SettingType.JOIN_ANIMATION)) return;
         if (player.isFlying() || !onGround || player.getGameMode().equals(GameMode.SPECTATOR)) return;
 
-        player.setInvulnerable(true);
-
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (!player.isOnline()) return;
+                boolean stillOnGround = player.getLocation().subtract(0, 1, 0).getBlock().getType().isSolid();
+                if (player.isFlying() || !stillOnGround || player.getGameMode().equals(GameMode.SPECTATOR)) return;
                 try {
                     EmoteListener.play(player, Animation.JOIN_RIFT);
                 } catch (Exception e) {

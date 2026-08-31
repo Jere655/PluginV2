@@ -3,13 +3,10 @@ package fr.openmc.core.features.animations.listeners;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
-import dev.lone.itemsadder.api.Events.PlayerEmoteEndEvent;
-import dev.lone.itemsadder.api.Events.PlayerEmotePlayEvent;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.types.NotLoadInUnitTest;
 import fr.openmc.core.features.animations.Animation;
 import fr.openmc.core.features.animations.PlayerAnimationInfo;
-import fr.openmc.core.utils.EnumUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -19,6 +16,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -29,23 +28,8 @@ import java.util.logging.Level;
 public class EmoteListener implements Listener, NotLoadInUnitTest {
     public static final HashMap<Player, PlayerAnimationInfo> playingAnimations = new HashMap<>();
 
-    @EventHandler
-    public void onAnimationStart(PlayerEmotePlayEvent e) {
-        Animation animation = EnumUtils.match(e.getEmoteName(), Animation.class);
-        if (animation == null) return;
-
-        play(e.getPlayer(), animation);
-    }
-
-    @EventHandler
-    public void onAnimationEndOrStop(PlayerEmoteEndEvent e) {
-        Animation animation = EnumUtils.match(e.getEmoteName(), Animation.class);
-        if (animation == null) return;
-
-        stop(e.getPlayer());
-    }
-
     public static void play(Player player, Animation animation) {
+        stop(player);
         Location base = player.getLocation();
 
         if (animation.getSoundName() != null) {
@@ -54,6 +38,7 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
 
         PlayerAnimationInfo info = new PlayerAnimationInfo();
         info.setAnimation(animation);
+        info.setOldInvulnerable(player.isInvulnerable());
         playingAnimations.put(player, info);
 
         EmoteListener.setupHead(player);
@@ -70,6 +55,7 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
             info.setOldFlySpeed(player.getFlySpeed());
             player.setWalkSpeed(0f);
             player.setFlySpeed(0f);
+            player.setInvulnerable(true);
         }
 
         BukkitTask task = new BukkitRunnable() {
@@ -117,7 +103,7 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
         PlayerAnimationInfo info = playingAnimations.remove(player);
         if (info == null) return;
 
-        player.setInvulnerable(false);
+        player.setInvulnerable(info.isOldInvulnerable());
 
         if (info.getAnimation() == Animation.JOIN_RIFT) {
             player.setWalkSpeed(info.getOldWalkSpeed());
@@ -131,7 +117,7 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
         if (info.getTask() != null)
             info.getTask().cancel();
 
-        restoreHead(player);
+        restoreHead(player, info);
     }
 
     @EventHandler
@@ -141,6 +127,27 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
         if (info != null && info.getAnimation() == Animation.JOIN_RIFT) {
             stop(event.getPlayer());
         }
+    }
+
+    /** Keep the player anchored while the camera is detached; looking remains allowed. */
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        PlayerAnimationInfo info = playingAnimations.get(event.getPlayer());
+        if (info == null || info.getAnimation() != Animation.JOIN_RIFT || event.getTo() == null) return;
+
+        Location from = event.getFrom();
+        Location to = event.getTo();
+        if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
+            to.setX(from.getX());
+            to.setY(from.getY());
+            to.setZ(from.getZ());
+            event.setTo(to);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        stop(event.getPlayer());
     }
 
     @EventHandler
@@ -185,11 +192,9 @@ public class EmoteListener implements Listener, NotLoadInUnitTest {
         player.teleport(loc);
     }
 
-    private static void restoreHead(Player player) {
-        PlayerAnimationInfo info = playingAnimations.get(player);
-        if (info == null) return;
-
+    private static void restoreHead(Player player, PlayerAnimationInfo info) {
         Float[] rot = info.getOldRotations();
+        if (rot == null) return;
         Location loc = player.getLocation().clone();
         loc.setYaw(rot[0]);
         loc.setPitch(rot[1]);

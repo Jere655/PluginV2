@@ -455,8 +455,16 @@ public class ItemsAdderContentConverter {
         Object singleTexture = graphics.get("texture");
         if (singleTexture instanceof String texture && !texture.isBlank()) {
             if (!isQualified(texture) && !hasTexture(texture)) report.missingAsset(fullId, "textures/" + texture);
-            String ref = isBlock ? qualify(stripExtension(texture)) : qualifyItemTexture(texture);
-            return ModelReference.texture(ref);
+            if (isBlock) {
+                String ref = qualify(stripExtension(texture));
+                Map<String, Object> textures = new LinkedHashMap<>();
+                for (String face : List.of("north", "south", "east", "west", "up", "down")) {
+                    textures.put(face, ref);
+                }
+                textures.put("particle", ref);
+                return ModelReference.generated(namespace + ":block/" + id, "minecraft:block/cube", textures);
+            }
+            return ModelReference.texture(qualifyItemTexture(texture));
         }
 
         Object modelPath = resource.get("model_path");
@@ -472,6 +480,15 @@ public class ItemsAdderContentConverter {
             }
 
             if (textures.size() == 1) {
+                if (isBlock) {
+                    String ref = qualify(stripExtension(textures.getFirst()));
+                    Map<String, Object> textures_map = new LinkedHashMap<>();
+                    for (String face : List.of("north", "south", "east", "west", "up", "down")) {
+                        textures_map.put(face, ref);
+                    }
+                    textures_map.put("particle", ref);
+                    return ModelReference.generated(namespace + ":block/" + id, "minecraft:block/cube", textures_map);
+                }
                 return ModelReference.texture(qualifyItemTexture(textures.getFirst()));
             }
 

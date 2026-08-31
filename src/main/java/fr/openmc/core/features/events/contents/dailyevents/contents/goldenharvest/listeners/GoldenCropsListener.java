@@ -3,6 +3,7 @@ package fr.openmc.core.features.events.contents.dailyevents.contents.goldenharve
 import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
 import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.features.events.contents.dailyevents.DailyEventsManager;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.AbondanceArmorManager;
 import fr.openmc.core.features.events.contents.dailyevents.contents.goldenharvest.GoldenHarvestEvent;
@@ -77,11 +78,8 @@ public class GoldenCropsListener implements Listener {
 
         if (ThreadLocalRandom.current().nextDouble() > GoldenHarvestManager.GOLDEN_CROP_ON_CROP_CHANCE) return;
 
-        CustomBlock customBlock = keyBlockGolden.getCustomBlock();
-        if (customBlock == null) return;
-
         Bukkit.getScheduler().runTaskLater(OMCPlugin.getInstance(), () ->
-                customBlock.place(event.getBlock().getLocation()), 1L);
+                OpenMCContent.placeBlock(event.getBlock().getLocation(), keyBlockGolden.getNamespacedID()), 1L);
 
         ParticleUtils.spawnDispersingParticles(
                 event.getBlock().getLocation().add(0.5, 0.5, 0.5),

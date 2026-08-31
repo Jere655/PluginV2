@@ -6,6 +6,10 @@ bootstrapper: fr.openmc.core.OMCBootstrap
 
 dependencies:
   server:
+    CraftEngine:
+      load: BEFORE
+      required: true
+      join-classpath: true
     FancyNpcs:
       load: BEFORE
       required: false

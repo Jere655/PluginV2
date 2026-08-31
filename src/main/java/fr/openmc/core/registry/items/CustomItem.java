@@ -1,6 +1,7 @@
 package fr.openmc.core.registry.items;
 
 import fr.openmc.core.OMCRegistry;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import dev.lone.itemsadder.api.CustomBlock;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.bukkit.ItemUtils;
@@ -69,7 +70,8 @@ public abstract class CustomItem {
      * server-side identity independent of any content plugin.
      */
     public ItemStack getBest() {
-        ItemStack item = getVanilla();
+        ItemStack item = OpenMCContent.createItem(getId());
+        if (item == null) item = getVanilla();
 
         ItemUtils.setTag(item, CustomItemRegistry.CUSTOM_ITEM_KEY, this.getId());
         ItemUtils.setItemModel(item, this.getId());

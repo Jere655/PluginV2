@@ -20,6 +20,7 @@ import fr.openmc.core.features.itemsadder.elevator.ElevatorBlock;
 import fr.openmc.core.features.itemsadder.elevator.ElevatorColor;
 import fr.openmc.core.hooks.craftengine.ConversionReport;
 import fr.openmc.core.hooks.craftengine.CraftEnginePackGenerator;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.registry.items.contents.AywenCap;
 import fr.openmc.core.registry.items.contents.Hammer;
@@ -365,6 +366,9 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
         String id = view.get(CUSTOM_ITEM_KEY, PersistentDataType.STRING);
 
         if (id != null) return this.get(id);
+
+        String craftEngineId = OpenMCContent.itemId(stack);
+        if (craftEngineId != null) return this.get(craftEngineId);
 
         // Compatibility only: recognize items already issued by legacy
         // ItemsAdder servers so player inventories do not lose identity.

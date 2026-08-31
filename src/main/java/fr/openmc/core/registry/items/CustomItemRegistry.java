@@ -1,8 +1,8 @@
 package fr.openmc.core.registry.items;
 
+import fr.openmc.core.CommandsManager;
 import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.CustomStack;
-import fr.openmc.core.CommandsManager;
 import fr.openmc.core.bootstrap.features.types.HasListeners;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.bootstrap.listeners.ListenerFactory;
@@ -301,7 +301,6 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
     public void postInit() {
         CommandsManager.getHandler().register(new CustomItemsDebugCommand());
         auditConvertedContents();
-        auditItemsAdderContents();
     }
 
     /**
@@ -343,39 +342,6 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
         }
     }
 
-    /**
-     * Liste les contenus attendus par OpenMC qui sont absents du fournisseur ItemsAdder.
-     * Ces items retombent sur leur variante vanilla au lieu de casser la feature qui les utilise.
-     */
-    private void auditItemsAdderContents() {
-        if (!ItemsAdderHook.isEnable()) return;
-
-        List<String> missingItems = values().stream()
-                .map(CustomItem::getId)
-                .filter(id -> CustomStack.getInstance(id) == null)
-                .sorted()
-                .toList();
-
-        List<String> missingBlocks = KeyBlock.getKnownCustomIDs().stream()
-                .filter(id -> CustomBlock.getInstance(id) == null)
-                .sorted()
-                .toList();
-
-        if (missingItems.isEmpty() && missingBlocks.isEmpty()) {
-            OMCLogger.successFormatted("Tous les contenus ItemsAdder attendus par OpenMC sont disponibles");
-            return;
-        }
-
-        if (!missingItems.isEmpty()) {
-            OMCLogger.warnFormatted("{} items ItemsAdder attendus par OpenMC sont introuvables (variante vanilla utilisée) : {}",
-                    missingItems.size(), String.join(", ", missingItems));
-        }
-
-        if (!missingBlocks.isEmpty()) {
-            OMCLogger.warnFormatted("{} blocs ItemsAdder attendus par OpenMC sont introuvables (features dégradées, pas désactivées) : {}",
-                    missingBlocks.size(), String.join(", ", missingBlocks));
-        }
-    }
 
     @Override
     public String key(CustomItem registryObject) {
@@ -398,27 +364,21 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
         PersistentDataContainerView view = stack.getPersistentDataContainer();
         String id = view.get(CUSTOM_ITEM_KEY, PersistentDataType.STRING);
 
-        if (id == null && ItemsAdderHook.isEnable()) {
-            CustomStack itemIa = CustomStack.byItemStack(stack);
+        if (id != null) return this.get(id);
 
-            if (itemIa == null) return Optional.empty();
-
-            return this.get(itemIa.getNamespacedID());
-        } else {
-            return this.get(id);
-        }
+        // Compatibility only: recognize items already issued by legacy
+        // ItemsAdder servers so player inventories do not lose identity.
+        if (!ItemsAdderHook.isEnable()) return Optional.empty();
+        CustomStack legacy = CustomStack.byItemStack(stack);
+        return legacy == null ? Optional.empty() : this.get(legacy.getNamespacedID());
     }
 
     public Optional<CustomItem> get(Block block) {
         if (block == null) return Optional.empty();
 
         if (!ItemsAdderHook.isEnable()) return Optional.empty();
-
-        CustomBlock customBlock = CustomBlock.byAlreadyPlaced(block);
-
-        if (customBlock == null) return Optional.empty();
-
-        return this.get(customBlock.getNamespacedID());
+        CustomBlock legacy = CustomBlock.byAlreadyPlaced(block);
+        return legacy == null ? Optional.empty() : this.get(legacy.getNamespacedID());
     }
 
     public CustomItem getOrThrow(ItemStack stack) {
@@ -427,16 +387,12 @@ public class CustomItemRegistry extends Registry<String, CustomItem>
         PersistentDataContainerView view = stack.getPersistentDataContainer();
         String id = view.get(CUSTOM_ITEM_KEY, PersistentDataType.STRING);
 
-        if (id == null && ItemsAdderHook.isEnable()) {
-            CustomStack itemIa = CustomStack.byItemStack(stack);
-
-            if (itemIa == null)
-                throw new IllegalArgumentException("Aucun CustomItem ne correspond à l'ItemStack " + stack.getType());
-
-            return this.getOrThrow(itemIa.getNamespacedID());
-        } else {
-            return this.getOrThrow(id);
+        if (id != null) return this.getOrThrow(id);
+        if (ItemsAdderHook.isEnable()) {
+            CustomStack legacy = CustomStack.byItemStack(stack);
+            if (legacy != null) return this.getOrThrow(legacy.getNamespacedID());
         }
+        throw new IllegalArgumentException("Aucun CustomItem ne correspond à l'ItemStack " + stack.getType());
     }
 
     public CustomItem register(String name, ItemStack item) {

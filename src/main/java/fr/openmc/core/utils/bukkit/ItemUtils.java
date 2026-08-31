@@ -1,10 +1,9 @@
 package fr.openmc.core.utils.bukkit;
 
-import dev.lone.itemsadder.api.CustomStack;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.OMCRegistry;
+import fr.openmc.core.registry.items.CustomItemRegistry;
 import fr.openmc.core.features.mailboxes.MailboxManager;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
@@ -59,18 +58,8 @@ public class ItemUtils {
         return getItemTranslation(stack.getType());
     }
 
-    /**
-     * @return le {@link CustomStack} correspondant, ou null si ItemsAdder est absent
-     * ou ne connait pas cet item
-     */
-    private static CustomStack getCustomStack(ItemStack stack) {
-        if (stack == null || !ItemsAdderHook.isEnable()) return null;
-        return CustomStack.byItemStack(stack);
-    }
-
     public static Component getItemName(ItemStack stack) {
-        CustomStack customItem = getCustomStack(stack);
-        if (customItem != null) {
+        if (stack != null && OMCRegistry.CUSTOM_ITEMS != null && OMCRegistry.CUSTOM_ITEMS.get(stack).isPresent()) {
             Component customName = stack.getItemMeta().customName();
             return customName != null ? customName : stack.displayName();
         }
@@ -477,6 +466,13 @@ public class ItemUtils {
         return item;
     }
 
+    public static void setItemModel(ItemStack item, String id) {
+        if (item == null || id == null || id.startsWith("_")) return;
+        NamespacedKey model = NamespacedKey.fromString(id);
+        if (model == null) return;
+        item.editMeta(meta -> meta.setItemModel(model));
+    }
+
     /**
      * Compare deux {@link ItemStack} pour vérifier s'ils sont similaires.
      * Deux items sont considérés similaires s'ils ont le même type
@@ -486,11 +482,9 @@ public class ItemUtils {
      * @return true si les items sont similaires, false sinon
      */
     public static boolean isSimilar(ItemStack item1, ItemStack item2) {
-        CustomStack customItem = getCustomStack(item1);
-        if (customItem != null) {
-            CustomStack customIs = getCustomStack(item2);
-            return customIs != null && customIs.getId().equals(customItem.getId());
-        }
+        String firstId = getTag(item1, CustomItemRegistry.CUSTOM_ITEM_KEY);
+        String secondId = getTag(item2, CustomItemRegistry.CUSTOM_ITEM_KEY);
+        if (firstId != null || secondId != null) return Objects.equals(firstId, secondId);
 
         if (item1 == null || item2 == null) return false;
         return item1.getType() == item2.getType();
@@ -507,11 +501,9 @@ public class ItemUtils {
      */
     @SuppressWarnings("UnstableApiUsage")
     public static boolean isSimilarMenu(ItemStack item1, ItemStack item2) {
-        CustomStack customItem = getCustomStack(item1);
-        if (customItem != null) {
-            CustomStack customIs = getCustomStack(item2);
-            return customIs != null && customIs.getId().equals(customItem.getId());
-        }
+        String firstId = getTag(item1, CustomItemRegistry.CUSTOM_ITEM_KEY);
+        String secondId = getTag(item2, CustomItemRegistry.CUSTOM_ITEM_KEY);
+        if (firstId != null || secondId != null) return Objects.equals(firstId, secondId);
 
         if (item1 == null || item2 == null) return false;
         if (item1.getType() != item2.getType()) return false;

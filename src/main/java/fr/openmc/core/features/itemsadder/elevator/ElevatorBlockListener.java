@@ -1,9 +1,8 @@
 package fr.openmc.core.features.itemsadder.elevator;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import dev.lone.itemsadder.api.CustomStack;
-import dev.lone.itemsadder.api.Events.CustomBlockBreakEvent;
-import dev.lone.itemsadder.api.Events.CustomBlockPlaceEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockBreakEvent;
+import net.momirealms.craftengine.bukkit.api.event.CustomBlockPlaceEvent;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.registry.items.CustomItem;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
@@ -134,16 +133,16 @@ public class ElevatorBlockListener implements Listener {
 
     @EventHandler
     public void onElevatorPlaced(CustomBlockPlaceEvent event) {
-        if (!ElevatorManager.isElevator(event.getNamespacedID())) return;
+        if (!ElevatorManager.isElevator(event.customBlock().id().asString())) return;
 
-        ElevatorManager.addToColumn(event.getBlock().getLocation());
+        ElevatorManager.addToColumn(event.bukkitBlock().getLocation());
     }
 
     @EventHandler
     public void onElevatorRemove(CustomBlockBreakEvent event) {
-        if (!ElevatorManager.isElevator(event.getNamespacedID())) return;
+        if (!ElevatorManager.isElevator(event.customBlock().id().asString())) return;
 
-        ElevatorManager.removeToColumn(event.getBlock().getLocation());
+        ElevatorManager.removeToColumn(event.bukkitBlock().getLocation());
     }
 
 }

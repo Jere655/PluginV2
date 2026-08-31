@@ -1,6 +1,5 @@
 package fr.openmc.core.features.milestones.tutorial.quests;
 
-import dev.lone.itemsadder.api.CustomBlock;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.city.CityManager;
 import fr.openmc.core.features.milestones.MilestonesManager;
@@ -11,7 +10,7 @@ import fr.openmc.core.features.quests.objects.QuestTier;
 import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestMoneyReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.Prefix;
 import fr.openmc.core.utils.text.messages.TranslationManager;
@@ -58,12 +57,8 @@ public class BreakAyweniteQuest extends MilestoneQuest implements Listener {
     public void onPlayerBreakBlock(BlockBreakEvent event) {
         if (MilestonesManager.getPlayerStep(type, event.getPlayer()) != step.ordinal()) return;
 
-        if (!ItemsAdderHook.isEnable()) return;
-
-        CustomBlock customBlock = CustomBlock.byAlreadyPlaced(event.getBlock());
-        if (customBlock != null && customBlock.getNamespacedID() != null &&
-                ("omc_blocks:aywenite_ore".equals(customBlock.getNamespacedID()) ||
-                        "omc_blocks:deepslate_aywenite_ore".equals(customBlock.getNamespacedID()))
+        String id = OpenMCContent.blockId(event.getBlock());
+        if ("omc_blocks:aywenite_ore".equals(id) || "omc_blocks:deepslate_aywenite_ore".equals(id)
         ) {
             Player player = event.getPlayer();
             this.incrementProgress(player.getUniqueId());

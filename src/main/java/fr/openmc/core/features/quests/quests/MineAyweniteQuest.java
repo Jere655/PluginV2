@@ -1,12 +1,11 @@
 package fr.openmc.core.features.quests.quests;
 
-import dev.lone.itemsadder.api.CustomBlock;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
 import fr.openmc.core.features.quests.rewards.QuestItemReward;
 import fr.openmc.core.features.quests.rewards.QuestMoneyReward;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
+import fr.openmc.core.hooks.craftengine.OpenMCContent;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -38,13 +37,8 @@ public class MineAyweniteQuest extends Quest implements Listener {
         if (tool.containsEnchantment(Enchantment.SILK_TOUCH))
             return; // Ne pas compter si le joueur utilise Silk Touch
 
-        if (!ItemsAdderHook.isEnable())
-            return;
-
-        CustomBlock customBlock = CustomBlock.byAlreadyPlaced(event.getBlock());
-        if (customBlock != null && customBlock.getNamespacedID() != null &&
-                ("omc_blocks:aywenite_ore".equals(customBlock.getNamespacedID()) ||
-                        "omc_blocks:deepslate_aywenite_ore".equals(customBlock.getNamespacedID()))
+        String id = OpenMCContent.blockId(event.getBlock());
+        if ("omc_blocks:aywenite_ore".equals(id) || "omc_blocks:deepslate_aywenite_ore".equals(id)
         ) {
             this.incrementProgress(event.getPlayer().getUniqueId());
         }

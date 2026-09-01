@@ -19,8 +19,14 @@ public final class OpenMCContent {
     private OpenMCContent() { }
 
     public static @Nullable ItemStack createItem(String id) {
-        var definition = CraftEngineItems.byId(id);
-        return definition == null ? null : definition.buildBukkitItem();
+        try {
+            var definition = CraftEngineItems.byId(id);
+            return definition == null ? null : definition.buildBukkitItem();
+        } catch (RuntimeException unavailable) {
+            // The API can be on the classpath before CraftEngine's Bukkit manager
+            // is initialized (for example in MockBukkit). Content remains optional.
+            return null;
+        }
     }
 
     public static @Nullable String itemId(ItemStack item) {

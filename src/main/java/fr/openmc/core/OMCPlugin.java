@@ -31,6 +31,7 @@ import fr.openmc.core.features.displays.bossbar.contents.HelpConfigManager;
 import fr.openmc.core.features.displays.holograms.HologramLoader;
 import fr.openmc.core.features.displays.scoreboards.ScoreboardManager;
 import fr.openmc.core.features.dream.DreamManager;
+import fr.openmc.core.features.earth.EarthManager;
 import fr.openmc.core.features.economy.BankManager;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.features.economy.TransactionsManager;
@@ -119,6 +120,7 @@ public class OMCPlugin extends JavaPlugin {
             ProfileManager::new,
             QuestsManager::new,
             CityManager::new,
+            EarthManager::new,
             DynamicCooldownManager::new,
             ContestManager::new,
             WeeklyEventsManager::new,

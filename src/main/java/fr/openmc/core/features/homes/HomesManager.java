@@ -108,4 +108,21 @@ public class HomesManager extends Feature implements HasDatabase, HasCommands {
             throw new RuntimeException("Erreur de sauvegarde des Homes ", e);
         }
     }
+
+    /**
+     * Updates the authoritative Home record immediately and restores the
+     * in-memory owner when persistence rejects the change.
+     */
+    public static synchronized boolean transferOwnership(Home home, UUID sellerId, UUID buyerId) {
+        if (home == null || sellerId == null || buyerId == null || sellerId.equals(buyerId)
+                || !sellerId.equals(home.getOwner()) || !homes.contains(home)) return false;
+        home.changeOwner(buyerId);
+        try {
+            homesDao.createOrUpdate(home);
+            return true;
+        } catch (SQLException exception) {
+            home.changeOwner(sellerId);
+            return false;
+        }
+    }
 }

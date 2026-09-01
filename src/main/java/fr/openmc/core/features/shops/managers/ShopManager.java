@@ -263,4 +263,14 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, HasData
 	public static void setUUIDShop(UUID shopUUID, Shop shop) {
 		shops.put(shopUUID, shop);
 	}
+
+    /** Persists an authoritative Shop ownership transfer and rolls memory back on failure. */
+    public static synchronized boolean transferOwnership(Shop shop, UUID sellerId, UUID buyerId) {
+        if (shop == null || sellerId == null || buyerId == null || sellerId.equals(buyerId)
+                || !sellerId.equals(shop.getOwnerUUID()) || shops.get(shop.getShopUUID()) != shop) return false;
+        shop.changeOwner(buyerId);
+        if (ShopDatabaseManager.saveDBShop(shop)) return true;
+        shop.changeOwner(sellerId);
+        return false;
+    }
 }

@@ -83,6 +83,9 @@ dependencies {
     testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    // CraftEngine remains compileOnly in production; MockBukkit plugin-load tests need its API classes at test runtime.
+    testImplementation "net.momirealms:craft-engine-core:${craftEngineVersion}"
+    testImplementation "net.momirealms:craft-engine-bukkit:${craftEngineVersion}"
     testImplementation paperweight.paperDevBundle("${minecraftVersion}-R0.1-SNAPSHOT")
     testImplementation "org.mockbukkit.mockbukkit:mockbukkit-v1.21:${mockbukkitVersion}"
     //testImplementation "org.mockbukkit.mockbukkit:mockbukkit-v26.2:${mockbukkitVersion}"

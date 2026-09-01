@@ -10,14 +10,15 @@ class KeyBlockTest {
     private static final String MISSING_ID = "omc_blocks:definitely_missing_block";
 
     @Test
-    @DisplayName("name() ne casse pas quand le bloc custom est absent du fournisseur ItemsAdder")
+    @DisplayName("name() ne casse pas quand le bloc custom est absent du registre CraftEngine")
     void testNameWithMissingCustomBlock() {
         KeyBlock keyBlock = KeyBlock.custom(MISSING_ID);
 
         Component name = Assertions.assertDoesNotThrow(keyBlock::name);
 
         Assertions.assertEquals(MISSING_ID, PlainTextComponentSerializer.plainText().serialize(name));
-        Assertions.assertNull(keyBlock.getCustomBlock());
+        Assertions.assertTrue(keyBlock.isCustom());
+        Assertions.assertEquals(MISSING_ID, keyBlock.getNamespacedID());
         Assertions.assertNull(keyBlock.getCustomItem());
         Assertions.assertTrue(KeyBlock.getKnownCustomIDs().contains(MISSING_ID));
     }

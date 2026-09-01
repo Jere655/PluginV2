@@ -76,6 +76,11 @@ public class Home {
         pitch = location.getPitch();
     }
 
+    /** Used only by an authority-preserving ownership transfer service. */
+    public void changeOwner(UUID newOwner) {
+        this.owner = newOwner;
+    }
+
     public String serializeLocation() {
         Location location = getLocation();
         return location.getWorld().getName() + "," +

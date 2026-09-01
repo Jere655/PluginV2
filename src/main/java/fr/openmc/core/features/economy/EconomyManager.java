@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -31,7 +32,9 @@ public class EconomyManager extends Feature implements HasDatabase, HasCommands 
 
     private static Dao<EconomyPlayer, String> playersDao;
 
-    private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    // Compact suffix output is a protocol-like value used in commands/UI, so it
+    // must not depend on whichever locale initialized this class first.
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.ROOT));
     public static final NavigableMap<Long, String> SUFFIXES = new TreeMap<>(Map.of(
             1_000L, "k",
             1_000_000L, "M",

@@ -3,6 +3,7 @@ package fr.openmc.core.features.shops.models;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.core.features.economy.EconomyManager;
+import fr.openmc.core.features.earth.EarthManager;
 import fr.openmc.core.features.shops.ShopFurniture;
 import fr.openmc.core.features.shops.managers.ShopManager;
 import fr.openmc.core.utils.bukkit.ItemUtils;
@@ -107,6 +108,11 @@ public class Shop {
     public boolean isOwner(Player player) {
         return isOwner(player.getUniqueId());
     }
+
+    /** Used only by an authority-preserving ownership transfer service. */
+    public void changeOwner(UUID newOwnerUUID) {
+        this.ownerUUID = newOwnerUUID;
+    }
     
     /**
      * Records a new sale in the shop by adding a {@code ShopSale} entry.
@@ -180,6 +186,7 @@ public class Shop {
         addSale(player, this.item.clone().setAmount(amount));
         addTurnover(totalPrice);
         this.item.removeAmount(amount);
+        if (EarthManager.getInstance() != null) EarthManager.getInstance().recordShopSale(this, totalPrice);
     }
     
     /**

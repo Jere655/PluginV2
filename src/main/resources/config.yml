@@ -32,6 +32,60 @@ chat:
 money-on-first-join: 500
 
 #####
+# Persistent Earth simulation
+#####
+# Existing OpenMC cities keep ownership of claims. This section assigns the
+# wider country/region context used by citizenship and the regional simulation.
+earth:
+    # Set false to retain all Earth data while not registering its commands,
+    # listeners, or scheduled simulation cycle on this server.
+    enabled: true
+    default-country: "canada"
+    # Real-world metres represented by one Minecraft block (1:1000 by default).
+    # Earth projection adapters read this instead of embedding a scale in gameplay code.
+    scale: 1000
+  # 20 ticks = one second. The simulation is intentionally slow and bounded.
+    simulation-period-ticks: 1200
+    simulation:
+      # The virtual calendar intentionally pauses while the server is offline.
+      real-day-seconds: 86400
+      simulated-months-per-real-day: 6
+  # Minimum delay between explicit /earth job work actions.
+  work-cooldown-seconds: 60
+  # Minimum delay between /earth civic volunteer actions.
+    civic-cooldown-seconds: 300
+    # Wall-clock election durations. Persisted phase timestamps survive restarts.
+    elections:
+      candidacy-seconds: 172800
+      campaign-seconds: 172800
+      voting-seconds: 86400
+      mandate-seconds: 604800
+  countries:
+    canada:
+      # Stable ISO-style code and government identity for integrations/imports.
+      code: "CA"
+      name: "Canada"
+      capital: "Ottawa"
+      currency: "CAD"
+      government: "federal_democracy"
+      government-id: "canada-federal-government"
+      active: true
+      tax-rate: 0.12
+      budget:
+        social-services: 0.40
+        infrastructure: 0.35
+        investment: 0.25
+      regions:
+        ontario:
+          name: "Ontario"
+          # Chunk bounds, inclusive. Replace these defaults with the server's
+          # real Earth projection before assigning production territory.
+          min-chunk-x: -5000
+          max-chunk-x: 5000
+          min-chunk-z: -5000
+          max-chunk-z: 5000
+
+#####
 # Paramètres pour un environnement de production
 #####
 homepage: "https://openmc.fr/"

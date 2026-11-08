@@ -1,3 +1,12 @@
+> [!IMPORTANT]
+> **Project status: WIP (Work in Progress)**
+>
+> This project is currently in development. Features, documentation, and implementation may change.
+>
+> Questions, suggestions, or contributions are welcome. Please contact me by opening a GitHub issue or pull request in this repository.
+
+---
+
 # Plugin OpenMC
 Nouveau plugin collaboratif pour un serveur : VOTRE serveur !
 
